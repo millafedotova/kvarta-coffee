@@ -23,4 +23,11 @@ This is a concise factual log. Preserve the actual session export or key screens
 
 ## Continue this log during implementation
 
+### 2026-10-15 — Complete execution plan
+
+- Expanded the design specification into an ordered frontend implementation sequence with named files, component contracts, exact layout choices, state transitions, and verification gates.
+- Added the backend-to-deployment execution sequence and a final submission checklist.
+- Clarified the server/client boundary so the static page can render through a small client provider without moving all content into the client bundle.
+- Kept the site, endpoint, and deployment marked as planned; no implementation checks are claimed as completed.
+
 Record concrete prompts or decisions, work performed by the user, work performed by AI, incorrect outputs and how they were detected, relevant verification, and remaining limitations. Do not mark checks as passed before running them.

@@ -6,6 +6,8 @@ Build a fast, mobile-first landing page for a fictional Minsk roastery. The visi
 
 The project is currently in the planning phase. This document specifies future implementation; component names and file paths below do not yet exist.
 
+Read this specification together with the [step-by-step frontend plan](frontend-plan.md). This document defines the complete product and backend requirements; the frontend plan defines the order of writing files, exact layouts, component contracts, and per-step verification. Section 15 below defines the remaining backend-to-submission execution order.
+
 Required outcome: a public repository with incremental commits, one live website with a working backend, authentic AI session evidence, a mobile Lighthouse report, and a concise final README. Deadline: October 19, 2026, 18:00 Moscow time. Target implementation effort: approximately six hours after planning, with optional work deferred if the core takes longer.
 
 ## 2. Creative direction and pattern analysis
@@ -107,9 +109,9 @@ Keep this decomposition pragmatic: adjacent static sections may share a file if 
 **Purpose:** explain the weekly proposition and move the visitor toward a choice.
 
 - Use the approved customer-facing idea: roast on Thursday, deliver on Friday. Supporting copy states batches of 5 kg and arrival 1–3 days after roasting.
-- Desktop: asymmetrical text/photo composition, with a smaller offer or schedule panel alongside. Mobile: message, CTA, then photograph/supporting panel.
+- Desktop: asymmetrical composition with approximately seven columns of copy and five of photography; weekly schedule panels sit below. Mobile: message, CTA, then photograph and schedule.
 - Place the beans macro in a dedicated image panel rather than behind dense text.
-- Primary CTA navigates to coffee. A quieter subscription shortcut selects subscription and brings the visitor to the request form or subscription explanation, consistently with its label.
+- Primary CTA navigates to coffee. A quieter native anchor leads to the subscription explanation without changing the draft. The subscription section's action selects subscription and leads to the request form.
 - Prioritize only the image that materially occupies the first screen. Reserve its aspect ratio to prevent layout shift.
 
 **Acceptance:** the first mobile view shows a meaningful proposition and action; copy is readable with images disabled; the real image crop has been reviewed.
@@ -354,3 +356,79 @@ Only after core acceptance and only when the user supplies/authorizes the destin
 - [libphonenumber-js validation and metadata documentation](https://github.com/catamphetamine/libphonenumber-js).
 
 Design specification complete. Implementation should follow the approved palette, section behavior, and backend invariants. Record unresolved assumptions and actual verification as work proceeds.
+
+## 15. Backend, release, and submission execution sequence
+
+Execute these steps after the frontend's shared contract and form shell exist. Follow sections 6, 7, and 10 for invariants and verification; do not replace transactional duplicate prevention with a visual button state.
+
+### B1. Define environment configuration and migration
+
+Files: `.env.example`, `src/lib/env.ts`, `db/migrations/001-create-leads.sql`.
+
+1. Document server-only `DATABASE_URL`, a separate disposable `TEST_DATABASE_URL`, and public-site metadata configuration `SITE_URL`. Keep Telegram variables absent until that feature is selected.
+2. Validate required database configuration when the endpoint is invoked, not when static page modules are imported. The marketing page must still build and render without a database connection.
+3. Create `leads` with a UUID ID, required normalized phone/name/interest, optional product/comment, database UTC creation timestamp, and bounded attribution JSON. Apply database check constraints for interest and relevant lengths.
+4. Add the `(phone, created_at DESC)` index. Do not create a permanent unique constraint on phone.
+5. Create and apply the migration against the intended database; record how to reproduce it. Keep the application connection string outside commits and client bundles.
+
+**Gate:** schema is reproducible; a direct valid test insert works in an isolated test database; incorrect constrained values fail; the app builds without accessing the database.
+
+### B2. Implement validation and the lead repository
+
+Files: `src/lib/lead-validation.ts`, `src/lib/lead-repository.ts`, server database connection module.
+
+1. Implement the shared field limits, strict Belarusian parsing, E.164 normalization, product-ID validation, and attribution allowlist.
+2. Mark persistence modules server-only and use a connection/driver that supports the entire interactive transaction.
+3. Implement lock, fresh duplicate check, optional insert, and commit on that same transaction connection.
+4. Return only a typed created/duplicate outcome. Roll back failed writes and release resources correctly.
+5. Keep the duplicate decision on database time after lock acquisition. Check the exact ten-minute boundary described in section 6.
+
+**Gate:** concurrent requests for equivalent phone formats create one durable row; a later request outside the window can create another; failures leave no partially accepted lead.
+
+### B3. Implement the HTTP endpoint
+
+File: `src/app/api/lead/route.ts`.
+
+1. Accept only the intended POST JSON contract and enforce a small body limit, for example 16 KiB.
+2. Reject malformed payloads and invalid fields before taking a database lock. Treat network JSON as unknown and parse it with the shared runtime schema.
+3. Invoke the repository and map its outcomes to 201/created or 200/duplicate. Map field errors to 400, oversized input to 413, unavailable persistence to 503.
+4. Apply same-origin checks when an Origin header is present. Add a cheap hidden honeypot only if it fits without reducing accessibility; neither is a substitute for duplicate protection.
+5. Use bounded request timeouts and `Cache-Control: no-store`. Never report created when persistence failed.
+6. Log a request identifier and safe error category, not phone numbers, names, comments, credentials, or full request bodies.
+
+**Gate:** the frontend adapter handles every response; no secret appears in a response or bundle; validation and persistence failures are distinguishable and recoverable.
+
+### B4. Verify the real integration
+
+Files: focused validation tests, repository integration tests, a short browser scenario file or written verification record.
+
+1. Use documented test fixtures; do not send genuine customer data during development.
+2. Exercise canonical phone equivalence, wrong country, invalid length/prefix, simultaneous requests, exact-window expiry, and separate clients sharing the database.
+3. Simulate a slow response, lost acknowledgement, database failure, and retry; confirm the client preserves input and the database still enforces the rule.
+4. Follow an attributed landing URL, choose a product, submit, and compare the saved attribution and selection with the intended values.
+5. Complete browser visual/focus checks at the widths in the frontend plan. Keep meaningful automated checks focused on business invariants and critical interactions.
+
+**Gate:** results are recorded, not inferred; no public test reset endpoint or lead-list endpoint has been introduced.
+
+### B5. Deploy on free hosting
+
+1. Verify account availability and free-plan suitability for Vercel and Neon. Use the existing GitHub repository; do not create a duplicate project or paid resource.
+2. Connect the intended branch, set environment variables in the appropriate preview/production scopes, and apply the migration to the correct database.
+3. Deploy, determine the actual URL, set canonical/OG URL configuration, and redeploy only if configuration changed.
+4. Confirm the site opens without a login barrier intended only for private previews.
+5. Submit a controlled test lead through the deployed form, confirm the durable record, then check its duplicate, invalid-phone, and campaign-attribution behavior.
+6. Record deployment URL and configuration instructions without exposing secret values. If deployment requires a missing account or credential, complete all independent work and name the specific remaining dependency.
+
+**Gate:** the public URL loads, images/fonts resolve, and the hosted endpoint saves a lead in the correct database.
+
+### B6. Package the submission
+
+1. Run a production build, TypeScript check, linter, and the focused tests after the final relevant changes.
+2. Run mobile Lighthouse against the deployed URL, save the real report or screenshot, and fix material regressions. Do not publish an estimated score.
+3. Verify the Open Graph title, description, and image URL; check an actual messenger preview if available.
+4. Complete image source records, documented assumptions, and the actual AI process evidence. Review any public export for secrets or unrelated personal content before publishing it.
+5. Replace the planning-status README with the requested concise implementation account: user work, AI work, a real AI mistake and detection, storage choice, known limits, and how to run/deploy.
+6. Ensure main contains the intended incremental commits and that the repository remains public.
+7. Prepare one submission message containing the live URL, repository URL, AI evidence, Lighthouse report, and README reference. Sending it to the assignment contact is a separate user-authorized action.
+
+**Gate:** every required deliverable is linked and accurate; missing optional features are explicitly documented.

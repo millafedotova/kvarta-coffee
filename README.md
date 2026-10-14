@@ -11,6 +11,7 @@ A landing page project for a fictional small-batch coffee roastery in Minsk, bas
 ## Documents
 
 - [Detailed implementation plan](docs/implementation-plan.md): each section, behavior, backend, milestones, and acceptance checks.
+- [Frontend implementation sequence](docs/frontend-plan.md): the exact file order, component contracts, layout, interaction states, API integration, and completion gates.
 - [Design palette](docs/palette.svg): color roles and accessible combinations.
 - [Asset preparation](docs/assets.md): selected photographs, required edits, and source verification.
 - [AI work log](docs/ai-work-log.md): an honest record of assistance and decisions; it does not replace the requested full session export or key screenshots.
