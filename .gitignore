@@ -30,3 +30,5 @@ leads.jsonl
 # Original local references are not public deliverables
 private-assets/
 private-session-exports/
+
+*.tsbuildinfo
