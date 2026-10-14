@@ -1,0 +1,32 @@
+# Dependencies and framework output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Local lead data and databases
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+leads.json
+leads.jsonl
+
+# Local tools and operating system files
+.DS_Store
+*.log
+.agents/
+.codex/
+
+# Original local references are not public deliverables
+private-assets/
+private-session-exports/

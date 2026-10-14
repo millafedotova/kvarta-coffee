@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title description">
+  <title id="title">Kvarta Coffee color palette</title>
+  <desc id="description">Deep green palette derived from the assignment, with a large wordmark, green panels, paper background, and readable text examples.</desc>
+  <rect width="1200" height="520" fill="#F7F8F6"/>
+  <text x="40" y="116" font-family="Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="-5" fill="#1D5C4A">KVARTA</text>
+  <text x="44" y="153" font-family="Arial, sans-serif" font-size="17" fill="#52635B">Deep green. Bold typography. Warm coffee photography.</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="40" y="188" width="272" height="190" rx="14" fill="#0E352B"/>
+    <text x="62" y="228" font-size="17" fill="#B9CEC3">FOREST DEEP</text>
+    <text x="62" y="272" font-size="32" font-weight="700" fill="#F7F8F6">#0E352B</text>
+    <text x="62" y="344" font-size="16" fill="#B9CEC3">Large panels and footer</text>
+    <rect x="322" y="188" width="272" height="190" rx="14" fill="#1D5C4A"/>
+    <text x="344" y="228" font-size="17" fill="#FFFFFF">FOREST</text>
+    <text x="344" y="272" font-size="32" font-weight="700" fill="#FFFFFF">#1D5C4A</text>
+    <text x="344" y="344" font-size="16" fill="#FFFFFF">Wordmark and primary actions</text>
+    <rect x="604" y="188" width="272" height="190" rx="14" fill="#FFFFFF" stroke="#D9E2DC"/>
+    <text x="626" y="228" font-size="17" fill="#52635B">PAPER</text>
+    <text x="626" y="272" font-size="32" font-weight="700" fill="#17201C">#F7F8F6</text>
+    <text x="626" y="344" font-size="16" fill="#52635B">Page background</text>
+    <rect x="886" y="188" width="272" height="190" rx="14" fill="#17201C"/>
+    <text x="908" y="228" font-size="17" fill="#F7F8F6">INK</text>
+    <text x="908" y="272" font-size="32" font-weight="700" fill="#F7F8F6">#17201C</text>
+    <text x="908" y="344" font-size="16" fill="#F7F8F6">Headings and body text</text>
+    <rect x="40" y="407" width="232" height="62" rx="31" fill="#1D5C4A"/>
+    <text x="156" y="445" text-anchor="middle" font-size="19" font-weight="700" fill="#FFFFFF">Choose your coffee</text>
+    <text x="302" y="433" font-size="17" fill="#17201C">White on forest: 7.83:1</text>
+    <text x="302" y="459" font-size="17" fill="#52635B">Supporting text on paper: 5.98:1</text>
+    <rect x="800" y="407" width="358" height="62" rx="12" fill="#0E352B"/>
+    <text x="820" y="433" font-size="18" font-weight="700" fill="#F7F8F6">Roast Thursday. Deliver Friday.</text>
+    <text x="820" y="459" font-size="15" fill="#B9CEC3">Minsk / small batches / since 2019</text>
+  </g>
+</svg>
