@@ -1,0 +1,241 @@
+.section {
+  padding-block: 72px 96px;
+  background: var(--sage-light);
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 96px;
+}
+.copy {
+  padding-top: 16px;
+}
+.copy > span {
+  color: var(--muted);
+}
+.copy h2 {
+  margin-top: 24px;
+  font-size: clamp(44px, 5.2vw, 72px);
+  color: var(--forest-deep);
+}
+.copy > p {
+  max-width: 350px;
+  font-size: 18px;
+  color: var(--muted);
+  margin-top: 28px;
+}
+.note {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 56px;
+  font-size: 13px;
+  color: var(--forest);
+}
+.star {
+  font-family: var(--display);
+  font-size: 56px;
+  line-height: 1;
+}
+.form {
+  background: var(--paper);
+  border-radius: 14px;
+  padding: 32px;
+}
+.fields {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 24px;
+}
+.field label,
+.interests legend {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+.field label > span,
+.interests legend > span {
+  color: var(--muted);
+}
+.field .optional {
+  font-weight: 400;
+  margin-left: 6px;
+  font-size: 12px;
+}
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid hsl(144 13% 50%);
+  padding: 14px 16px;
+  background: var(--white);
+  border-radius: 8px;
+  color: var(--ink);
+  transition: border-color 150ms;
+}
+.field textarea {
+  resize: vertical;
+  min-height: 104px;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.field input:hover,
+.field textarea:hover {
+  border-color: var(--forest);
+}
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: var(--error);
+}
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.error {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 8px;
+}
+.interests {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.option {
+  position: relative;
+  cursor: pointer;
+}
+.option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.option span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid hsl(144 13% 50%);
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 10px 14px;
+  font-size: 13px;
+  transition: background 150ms;
+}
+.option span::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+}
+.option input:checked + span {
+  color: var(--paper);
+  background: var(--forest);
+  border-color: var(--forest);
+}
+.option input:checked + span::before {
+  border-color: var(--paper);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 3px var(--forest);
+}
+.option input:focus-visible + span {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+}
+.selection {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--sage-light);
+  border-radius: 8px;
+  padding: 16px;
+}
+.selection strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+.selection span:last-child {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--muted);
+}
+.selection button {
+  align-self: center;
+  width: 48px;
+  height: 48px;
+  font-size: 26px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.selection > div > :global(.eyebrow) {
+  font-size: 10px;
+}
+.submit {
+  width: 100%;
+}
+.status {
+  min-height: 50px;
+  padding-top: 8px;
+}
+.success {
+  color: var(--forest);
+  font-size: 14px;
+  margin-top: 8px;
+}
+@media (max-width: 1023px) {
+  .grid {
+    gap: 48px;
+  }
+  .form {
+    padding: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .section {
+    padding-block: 48px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .copy > p {
+    font-size: 16px;
+  }
+  .note {
+    margin-top: 24px;
+    gap: 16px;
+  }
+  .star {
+    font-size: 40px;
+  }
+  .form {
+    padding: 24px 20px;
+  }
+  .options {
+    gap: 6px;
+  }
+  .option span {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,127 @@
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--forest-deep);
+  color: var(--paper);
+}
+.copy {
+  padding: 48px;
+}
+.copy > span {
+  color: var(--inverse-muted);
+}
+.copy h2 {
+  font-size: clamp(38px, 4.5vw, 64px);
+  margin-top: 24px;
+}
+.description {
+  font-size: 18px;
+  color: var(--inverse-muted);
+  margin-top: 24px;
+}
+.offer {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding-block: 32px;
+}
+.offer strong {
+  font-family: var(--display);
+  font-size: 72px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.offer strong span {
+  display: block;
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-top: 10px;
+}
+.offer p {
+  font-size: 13px;
+  color: var(--inverse-muted);
+}
+.steps {
+  padding: 0;
+  margin: 32px 0 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--inverse-muted);
+}
+.steps li {
+  display: flex;
+  gap: 16px;
+  padding-block: 10px;
+  border-top: 1px solid hsl(165 23% 28%);
+}
+.steps span {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding-top: 2px;
+}
+.photo {
+  position: relative;
+  background: #65432d;
+  min-height: 550px;
+}
+.image {
+  object-fit: cover;
+}
+.caption {
+  position: absolute;
+  inset: auto 24px 24px;
+  padding: 24px;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--forest-deep);
+}
+.caption > span:last-child {
+  display: block;
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin-top: 12px;
+}
+@media (max-width: 1023px) {
+  .copy {
+    padding: 32px;
+  }
+  .offer {
+    gap: 20px;
+  }
+}
+@media (max-width: 767px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+  .copy {
+    padding: 28px 24px;
+  }
+  .description {
+    font-size: 16px;
+  }
+  .offer strong {
+    font-size: 64px;
+  }
+  .photo {
+    min-height: 0;
+    aspect-ratio: 1.35;
+  }
+  .caption {
+    inset: auto 16px 16px;
+    padding: 16px;
+  }
+  .caption > span:last-child {
+    font-size: 24px;
+  }
+}
+
+.panel :focus-visible {
+  outline-color: var(--paper);
+}

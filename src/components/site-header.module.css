@@ -1,0 +1,128 @@
+.masthead {
+  padding-top: 24px;
+}
+.topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  font-weight: 500;
+  color: var(--forest);
+}
+.wordmark {
+  display: block;
+  position: relative;
+  margin: 8px 0 0;
+  font-family: var(--display);
+  font-size: clamp(80px, 24vw, 280px);
+  line-height: 0.97;
+  letter-spacing: -0.075em;
+  font-weight: 850;
+  color: var(--forest);
+  text-decoration: none;
+}
+.wordmarkDot {
+  position: absolute;
+  font-size: 26px;
+  top: 16%;
+  right: 1%;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.baseline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-block: 12px 24px;
+  color: var(--forest);
+}
+.smallNote {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--paper);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.navInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  min-height: 64px;
+}
+.links {
+  display: flex;
+  gap: clamp(24px, 4vw, 64px);
+}
+.links a,
+.requestLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.links a:hover,
+.requestLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+.requestLink {
+  color: var(--forest);
+  gap: 24px;
+}
+@media (max-width: 767px) {
+  .masthead {
+    padding-top: 18px;
+  }
+  .topline {
+    font-size: 9px;
+    letter-spacing: 0.07em;
+  }
+  .wordmark {
+    margin-top: 16px;
+  }
+  .wordmarkDot {
+    font-size: 14px;
+    right: 0;
+    top: 10%;
+  }
+  .baseline {
+    font-size: 12px;
+    margin-block: 8px 18px;
+  }
+  .smallNote {
+    display: none;
+  }
+  .navInner {
+    min-height: 58px;
+    gap: 0;
+  }
+  .links {
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .links a {
+    font-size: 12px;
+  }
+  .requestLink {
+    display: none;
+  }
+}
+@media (max-width: 359px) {
+  .topline span:last-child {
+    font-size: 8px;
+  }
+  .links a {
+    font-size: 11px;
+  }
+}

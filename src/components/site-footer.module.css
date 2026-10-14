@@ -1,0 +1,74 @@
+.footer {
+  background: var(--forest-deep);
+  color: var(--paper);
+  padding-block: 48px 24px;
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+.logo {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  font-family: var(--display);
+  font-size: 60px;
+  font-weight: 800;
+  letter-spacing: -0.065em;
+  line-height: 1;
+  text-decoration: none;
+}
+.logo span {
+  font-size: 28px;
+  margin-top: 4px;
+}
+.top p {
+  font-size: 14px;
+  color: var(--inverse-muted);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 24px;
+  font-size: 14px;
+  text-decoration: none;
+}
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid hsl(165 23% 28%);
+  margin-top: 48px;
+  padding-top: 24px;
+  color: var(--inverse-muted);
+  font-size: 11px;
+}
+.bottom span:nth-child(2) {
+  letter-spacing: 0.08em;
+  font-size: 10px;
+}
+@media (max-width: 767px) {
+  .top {
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .logo {
+    font-size: 46px;
+  }
+  .top p {
+    width: 100%;
+    order: 3;
+  }
+  .bottom {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+  }
+}
+
+.footer :focus-visible {
+  outline-color: var(--paper);
+}
