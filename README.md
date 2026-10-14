@@ -1,33 +1,42 @@
 # Kvarta Coffee
 
-A landing page project for a fictional small-batch coffee roastery in Minsk, based on the [assignment brief](https://tz.vitai.world/).
+A responsive Russian-language frontend for a fictional small-batch coffee roastery in Minsk, based on the [assignment](https://tz.vitai.world/). The design uses the brief's deep green palette, an oversized wordmark, photographic panels, and Thursday-roasting/Friday-delivery messaging.
 
-**Status:** planning complete; website implementation has not started. This repository currently contains the implementation specification, palette preview, asset preparation notes, and an AI work log. No live website or working lead endpoint exists yet.
+**Status:** the frontend is implemented and locally verified. Durable lead storage and public deployment remain the backend/release milestones. The current `/api/lead` validates requests and returns `503 unavailable` for valid leads; it never claims an unsaved lead was received.
 
-## Direction
+## Run
 
-**Coffee on your own rhythm:** roasted on Thursday, delivered around Minsk on Friday. The design combines the assignment's deep green palette with Camera Obscura's oversized wordmark, assertive typography, and photographic composition.
+Use Node.js 24 or newer and npm:
 
-## Documents
+```sh
+npm ci
+npm run dev
+```
 
-- [Detailed implementation plan](docs/implementation-plan.md): each section, behavior, backend, milestones, and acceptance checks.
-- [Frontend implementation sequence](docs/frontend-plan.md): the exact file order, component contracts, layout, interaction states, API integration, and completion gates.
-- [Design palette](docs/palette.svg): color roles and accessible combinations.
-- [Asset preparation](docs/assets.md): selected photographs, required edits, and source verification.
-- [AI work log](docs/ai-work-log.md): an honest record of assistance and decisions; it does not replace the requested full session export or key screenshots.
+Open the printed local URL. For production verification, run `npm run build`, then `npm start`. Set `SITE_URL` to the actual site origin during deployment so canonical and social URLs resolve correctly. Database credentials are not needed for this frontend stage.
 
-## Planned stack
+## Implemented
 
-Next.js App Router, TypeScript, CSS Modules with shared design tokens, PostgreSQL on Neon, and Vercel. Persisted database transactions will enforce the ten-minute duplicate rule across simultaneous requests and function instances.
+All required content sections, four product selections, subscription selection, one shared form, strict Belarusian phone validation, campaign attribution, pending/success/duplicate/error handling, keyboard focus, responsive CSS, local fonts, optimized images, favicon, and a generated 1200 x 630 social preview. Success and duplicate states require the corresponding validated backend acknowledgement; tests simulate those contracts without creating actual leads.
 
-Repository code, identifiers, comments, commits, and documentation are in English. Customer-facing content will be in Russian for the audience described in the brief.
+## Checks
 
-## Delivery checklist
+`npm run build`, `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm test`. Nineteen tests cover phone validation, selection preservation, campaign sanitization, request acknowledgements, repeat submits, and the API boundary. See [verification](docs/verification.md) for actual results and remaining work.
 
-- [ ] Responsive landing page with all assignment content.
-- [ ] Working deployed `POST /api/lead` with Belarusian phone validation.
-- [ ] Database-backed duplicate prevention, attribution, and understandable failure states.
-- [ ] Step-by-step commits, actual AI session evidence, and mobile Lighthouse report.
-- [ ] Final half-page README documenting contributions, assumptions, mistakes, and unfinished work.
+## Process and limitations
 
-The final submission deadline is October 19, 2026, at 18:00 Moscow time.
+The user supplied the brief, selected references/photos, and chose the green direction. AI authored the frontend, tests, documentation, and generated package/process imagery. Image generation initially invented a city/year on packages; visual inspection caught this and the labels were corrected. Browser testing also caught an internal-hostname mismatch in the local API origin check; it was fixed and regression-tested.
+
+The supplied macro-photo licenses still need source verification before final release. No business phone/email, subscription cancellation terms, or delivery cutoff was invented. The next step is transactional PostgreSQL persistence, followed by deployment, real duplicate tests, and the required deployed mobile Lighthouse report.
+
+## Project documents
+
+- [Complete implementation plan](docs/implementation-plan.md)
+- [Frontend execution plan](docs/frontend-plan.md)
+- [Verification and progress](docs/verification.md)
+- [Palette](docs/palette.svg)
+- [Assets and provenance](docs/assets.md)
+- [Image prompts](docs/image-prompts.md)
+- [AI work log](docs/ai-work-log.md)
+
+Repository code, comments, documentation, and commits use English; customer-facing copy uses Russian. The submission deadline is October 19, 2026, 18:00 Moscow time.

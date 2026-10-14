@@ -1,6 +1,6 @@
 # Kvarta Coffee — Frontend Implementation Sequence
 
-This is the ordered plan for writing the frontend, from the first application file to the deployed form. It supplements the [complete product/backend specification](implementation-plan.md) and [asset preparation plan](assets.md). All steps are future work; none of the application files below currently exist.
+This is the ordered plan for writing the frontend, from the first application file to the deployed form. It supplements the [complete product/backend specification](implementation-plan.md) and [asset preparation plan](assets.md). Frontend implementation has now been completed locally; the original steps below remain the design specification. See [verification and remaining integration work](verification.md) for actual status.
 
 ## 1. Decisions to carry through implementation
 
@@ -381,18 +381,18 @@ Use these boundaries when their work is actually complete. Combine tiny adjacent
 
 ## 23. Final frontend completion checklist
 
-- [ ] All four products and subscription match the brief exactly.
-- [ ] Wordmark, green palette, image crops, and visual rhythm fit the chosen direction.
-- [ ] Every navigation link and product/subscription CTA works.
-- [ ] Selection and draft state are shared, valid, and preserved correctly.
-- [ ] Form has permanent labels, appropriate phone handling, and all request states.
+- [x] All four products and subscription match the brief exactly.
+- [x] Wordmark, green palette, image crops, and visual rhythm fit the chosen direction.
+- [x] Every navigation link and product/subscription CTA works.
+- [x] Selection and draft state are shared, valid, and preserved correctly.
+- [x] Form has permanent labels, appropriate phone handling, and all request states.
 - [ ] Success requires the actual server's durable confirmation.
 - [ ] Campaign/page context is captured and saved with the lead.
-- [ ] 320/390/768/1440 px views and keyboard flow have been inspected.
+- [x] 320/390/768/1440 px views and keyboard flow have been inspected.
 - [ ] Final contrast, focus, alternative text, and reduced motion have been checked.
 - [ ] Production assets/fonts, metadata, preview, and live form have been verified.
 - [ ] Actual Lighthouse report and authentic AI evidence are included in the delivery.
-- [ ] README accurately states remaining limitations.
+- [x] README accurately states remaining limitations.
 
 ## 24. Official framework references
 

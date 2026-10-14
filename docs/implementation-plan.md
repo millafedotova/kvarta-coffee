@@ -4,7 +4,7 @@
 
 Build a fast, mobile-first landing page for a fictional Minsk roastery. The visitor must understand freshness, choose a product or monthly subscription, and leave a callback request. The manager completes the order.
 
-The project is currently in the planning phase. This document specifies future implementation; component names and file paths below do not yet exist.
+This document records the original product and backend specification. The frontend is now implemented; see [current verification and progress](verification.md). Persistence and deployment remain future work.
 
 Read this specification together with the [step-by-step frontend plan](frontend-plan.md). This document defines the complete product and backend requirements; the frontend plan defines the order of writing files, exact layouts, component contracts, and per-step verification. Section 15 below defines the remaining backend-to-submission execution order.
 

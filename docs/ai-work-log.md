@@ -31,3 +31,17 @@ This is a concise factual log. Preserve the actual session export or key screens
 - Kept the site, endpoint, and deployment marked as planned; no implementation checks are claimed as completed.
 
 Record concrete prompts or decisions, work performed by the user, work performed by AI, incorrect outputs and how they were detected, relevant verification, and remaining limitations. Do not mark checks as passed before running them.
+
+## 2026-10-15 — Frontend implementation
+
+- Scaffolded Next.js 16.4.1 with TypeScript and CSS Modules, retaining the existing planning repository.
+- Implemented the green visual system, Russian content, responsive sections, shared product/subscription selection, and request form.
+- Used self-hosted Geologica/Golos Text fonts, user-supplied macro photographs, and generated pouch/drip/process images.
+- Visual inspection caught invented Moscow/year/roast claims on generated package labels; targeted image edits removed them and retained exact supplied product information.
+- Implemented strict Belarusian phone parsing, allowlisted tab-session campaign capture, bounded request transport, and honest response-state handling.
+- Added an API validation boundary that explicitly returns unavailable until durable persistence is implemented. No simulated success exists in application code.
+- Browser verification caught rejection of valid requests because the framework's internal hostname differed from the preview host. The Origin check now respects the request host or configured production origin, with regression coverage.
+- A build launched during dependency installation temporarily saw missing Node type definitions. Installation was completed and subsequent checks were run against stable dependencies.
+- Updated Node typings to match the actual Node 24 runtime instead of forcing an incompatible testing dependency resolution.
+- Ran meaningful tests, lint/type/build checks, checked image labels/social preview, and inspected responsive layouts and actual API failure feedback. Detailed evidence is in verification.md.
+- Durable database storage, real ten-minute server duplicate protection, public deployment, deployed Lighthouse, and final submission remain the following milestones.
