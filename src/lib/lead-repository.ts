@@ -23,9 +23,20 @@ export function createLeadRepository(pool: Pool) {
   ): Promise<"created" | "duplicate"> {
     const client = await pool.connect();
     let released = false;
-    const deadline = setTimeout(() => {
+    let connectionFailed = false;
+    const onConnectionError = () => {
+      connectionFailed = true;
+    };
+    client.on("error", onConnectionError);
+    function release(destroy = false) {
+      if (released) return;
       released = true;
-      client.release(true);
+      // The pool installs its idle error listener before ours is removed.
+      client.release(destroy);
+      client.off("error", onConnectionError);
+    }
+    const deadline = setTimeout(() => {
+      release(true);
     }, 9000);
     try {
       await client.query("BEGIN ISOLATION LEVEL READ COMMITTED");
@@ -83,21 +94,18 @@ export function createLeadRepository(pool: Pool) {
       await client.query("COMMIT");
       return "created";
     } catch (error) {
-      if (!released) {
+      if (!released && !connectionFailed) {
         try {
           await client.query("ROLLBACK");
         } catch {
           /* Discard a broken connection below. */
         }
       }
-      if (!released) {
-        released = true;
-        client.release(true);
-      }
+      release(true);
       throw error;
     } finally {
       clearTimeout(deadline);
-      if (!released) client.release();
+      release(connectionFailed);
     }
   };
 }

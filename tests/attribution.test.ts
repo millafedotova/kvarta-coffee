@@ -1,8 +1,48 @@
 import { describe, expect, it, vi } from "vitest";
 import { captureAttribution, sanitizePageUrl } from "../src/lib/attribution";
 import { leadSchema } from "../src/lib/lead-validation";
+import { attributionSchema } from "../src/lib/page-context";
 
 describe("campaign attribution", () => {
+  it("drops invalid optional campaign values while preserving valid fields", () => {
+    const result = attributionSchema.parse({
+      version: 1,
+      enteredAt: "2026-10-15T08:00:00Z",
+      referrer: "",
+      landingUrl: "https://example.com/?utm_source=%00&utm_medium=cpc",
+      campaign: { utm_source: "\u0000", utm_medium: "cpc" },
+    });
+    expect(result.campaign.utm_source).toBeUndefined();
+    expect(result.campaign.utm_medium).toBe("cpc");
+    expect(result.landingUrl).toBe("https://example.com/?utm_medium=cpc");
+  });
+  it("discards an unsupported entry year without discarding the campaign", () => {
+    const result = attributionSchema.parse({
+      version: 1,
+      enteredAt: "0000-01-01T00:00:00Z",
+      campaign: { utm_source: "ads" },
+    });
+    expect(result.enteredAt).toBeNull();
+    expect(result.campaign.utm_source).toBe("ads");
+    expect(
+      attributionSchema.parse({
+        version: 1,
+        enteredAt: "0001-01-01T00:00:00Z",
+        campaign: {},
+      }).enteredAt,
+    ).toBe("0001-01-01T00:00:00Z");
+  });
+  it("cleans newly captured campaign values from an encoded null byte", () => {
+    window.history.replaceState(null, "", "/?utm_source=%00&utm_medium=cpc");
+    try {
+      const result = captureAttribution();
+      expect(result.campaign.utm_source).toBeUndefined();
+      expect(result.campaign.utm_medium).toBe("cpc");
+      expect(result.landingUrl).not.toContain("utm_source");
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
+  });
   it("sanitizes tampered stored context and discards unrelated keys", () => {
     sessionStorage.setItem(
       "kvarta.attribution.v1",

@@ -1,6 +1,8 @@
 import { beforeAll, beforeEach, afterAll, expect, it } from "vitest";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { applyMigrations } from "../../scripts/migration-runner.mjs";
 import {
   createLeadRepository,
@@ -136,6 +138,81 @@ it("creates exactly one row for simultaneous first submissions", async () => {
     (await pool.query("SELECT count(*)::int AS count FROM leads")).rows[0]
       .count,
   ).toBe(1);
+});
+
+it("handles an active connection failure without an uncaught exception or listener leak", () => {
+  const output = execFileSync(
+    process.execPath,
+    [
+      "--conditions=react-server",
+      fileURLToPath(
+        new URL("../fixtures/lead-disconnect.mjs", import.meta.url),
+      ),
+    ],
+    {
+      encoding: "utf8",
+      timeout: 10000,
+      env: { ...process.env, TEST_DATABASE_URL: testUrl },
+    },
+  );
+  const result: unknown = JSON.parse(output);
+  expect(result).toEqual({
+    rejected: true,
+    created: "created",
+    duplicate: "duplicate",
+    leakedListeners: 0,
+  });
+});
+
+it("stores valid contact data despite a zero byte in an optional campaign value", async () => {
+  const response = await POST(
+    new Request("http://localhost:3000/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...draft,
+        attribution: {
+          version: 1,
+          enteredAt: "2026-10-15T08:00:00Z",
+          referrer: "",
+          landingUrl: "https://example.com/?utm_source=%00&utm_medium=cpc",
+          campaign: { utm_source: "\u0000", utm_medium: "cpc" },
+        },
+      }),
+    }),
+  );
+  expect(response.status).toBe(201);
+  expect(
+    (await pool.query("SELECT utm_source, utm_medium, landing_url FROM leads"))
+      .rows,
+  ).toEqual([
+    {
+      utm_source: null,
+      utm_medium: "cpc",
+      landing_url: "https://example.com/?utm_medium=cpc",
+    },
+  ]);
+});
+
+it("stores valid contact data while dropping an unsupported optional entry year", async () => {
+  const response = await POST(
+    new Request("http://localhost:3000/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...draft,
+        attribution: {
+          version: 1,
+          enteredAt: "0000-01-01T00:00:00Z",
+          campaign: { utm_source: "ads" },
+        },
+      }),
+    }),
+  );
+  expect(response.status).toBe(201);
+  expect(
+    (await pool.query("SELECT entered_at, utm_source FROM leads")).rows,
+  ).toEqual([{ entered_at: null, utm_source: "ads" }]);
 });
 
 it("applies the exact ten-minute boundary without rounding database microseconds", async () => {

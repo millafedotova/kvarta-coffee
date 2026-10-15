@@ -30,6 +30,19 @@ describe("Belarusian phone validation", () => {
 });
 
 describe("lead draft contract", () => {
+  it("rejects zero bytes in editable contact fields with field errors", () => {
+    for (const field of ["name", "comment"] as const) {
+      const result = draftSchema.safeParse({
+        ...draft,
+        [field]: "Test\u0000value",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(
+          result.error.issues.some((issue) => issue.path[0] === field),
+        ).toBe(true);
+    }
+  });
   it("trims inputs and allows an empty optional comment", () => {
     const result = draftSchema.parse({
       ...draft,

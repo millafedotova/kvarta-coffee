@@ -37,7 +37,11 @@ export const draftSchema = z
       .string()
       .trim()
       .min(1, "Как к вам обращаться?")
-      .max(100, "Введите имя не длиннее 100 символов."),
+      .max(100, "Введите имя не длиннее 100 символов.")
+      .refine(
+        (value) => !value.includes("\u0000"),
+        "Введите имя заново: в нём есть недопустимый символ.",
+      ),
     phone: phoneSchema,
     interest: z.enum(interests, { error: "Выберите, что вас интересует." }),
     productId: productIdSchema,
@@ -45,6 +49,10 @@ export const draftSchema = z
       .string()
       .trim()
       .max(1000, "Сократите комментарий до 1000 символов.")
+      .refine(
+        (value) => !value.includes("\u0000"),
+        "Введите комментарий заново или оставьте поле пустым.",
+      )
       .default(""),
   })
   .superRefine((value, context) => {

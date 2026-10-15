@@ -1,6 +1,6 @@
 import { attributionSchema, type Attribution } from "./lead-contract";
 
-import { campaignKeys, sanitizePageUrl } from "./page-context";
+import { campaignKeys, campaignSchema, sanitizePageUrl } from "./page-context";
 export { sanitizePageUrl } from "./page-context";
 
 const storageKey = "kvarta.attribution.v1";
@@ -27,7 +27,7 @@ export function captureAttribution(): Attribution {
     landingUrl: sanitizePageUrl(window.location.href),
     referrer: sanitizePageUrl(document.referrer),
     enteredAt: new Date().toISOString(),
-    campaign,
+    campaign: campaignSchema.parse(campaign),
   };
   try {
     sessionStorage.setItem(storageKey, JSON.stringify(attribution));

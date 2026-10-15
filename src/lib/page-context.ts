@@ -19,7 +19,8 @@ export function sanitizePageUrl(value: unknown): string {
     const parameters = new URLSearchParams();
     for (const key of campaignKeys) {
       const entry = url.searchParams.get(key);
-      if (entry) parameters.set(key, entry.slice(0, 256));
+      if (entry && !entry.includes("\u0000"))
+        parameters.set(key, entry.slice(0, 256));
     }
     url.search = parameters.toString();
     const result = url.toString();
@@ -29,18 +30,30 @@ export function sanitizePageUrl(value: unknown): string {
   }
 }
 
+const campaignValueSchema = z
+  .string()
+  .max(256)
+  .refine((value) => !value.includes("\u0000"))
+  .optional()
+  .catch(undefined);
+
 export const campaignSchema = z.object({
-  utm_source: z.string().max(256).optional().catch(undefined),
-  utm_medium: z.string().max(256).optional().catch(undefined),
-  utm_campaign: z.string().max(256).optional().catch(undefined),
-  utm_content: z.string().max(256).optional().catch(undefined),
-  utm_term: z.string().max(256).optional().catch(undefined),
+  utm_source: campaignValueSchema,
+  utm_medium: campaignValueSchema,
+  utm_campaign: campaignValueSchema,
+  utm_content: campaignValueSchema,
+  utm_term: campaignValueSchema,
 });
 export const pageUrlSchema = z.unknown().transform(sanitizePageUrl).default("");
 export const attributionSchema = z.object({
   version: z.literal(1),
   landingUrl: pageUrlSchema,
   referrer: pageUrlSchema,
-  enteredAt: z.string().datetime().nullable().catch(null),
+  enteredAt: z
+    .string()
+    .datetime()
+    .refine((value) => !value.startsWith("0000-"))
+    .nullable()
+    .catch(null),
   campaign: campaignSchema.catch({}),
 });
