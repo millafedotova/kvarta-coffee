@@ -4,6 +4,8 @@
 
 The frontend milestone is implemented. This is a local verification record, not a claim that the assignment's complete deployed lead-capture system is finished.
 
+The [integration plan reviewed on October 15](integration-plan.md) defines the remaining work and documents gaps found in the current API boundary. Later copy revisions are recorded in the AI work log; the original screenshots and check results below describe the frontend milestone, not a new release measurement.
+
 - F01–F12: application, visual system, sections, selection, form, and attribution implemented.
 - F13: typed request transport and response UI implemented and tested; the current validation endpoint deliberately returns unavailable until persistence exists.
 - F14–F17: responsive refinement, accessible structure/focus, asset handling, favicon, and social preview implemented and locally inspected.

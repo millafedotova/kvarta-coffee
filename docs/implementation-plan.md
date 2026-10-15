@@ -6,13 +6,13 @@ Build a fast, mobile-first landing page for a fictional Minsk roastery. The visi
 
 This document records the original product and backend specification. The frontend is now implemented; see [current verification and progress](verification.md). Persistence and deployment remain future work.
 
-Read this specification together with the [step-by-step frontend plan](frontend-plan.md). This document defines the complete product and backend requirements; the frontend plan defines the order of writing files, exact layouts, component contracts, and per-step verification. Section 15 below defines the remaining backend-to-submission execution order.
+Read this specification together with the [step-by-step frontend plan](frontend-plan.md) and the [remaining integration plan](integration-plan.md). This document defines product requirements; the frontend plan records frontend implementation; the integration plan is the active sequence for database, API, deployment, and submission work. Section 15 maps the original backend milestones to that sequence.
 
 Required outcome: a public repository with incremental commits, one live website with a working backend, authentic AI session evidence, a mobile Lighthouse report, and a concise final README. Deadline: October 19, 2026, 18:00 Moscow time. Target implementation effort: approximately six hours after planning, with optional work deferred if the core takes longer.
 
 ## 2. Creative direction and pattern analysis
 
-**Concept: Coffee on your own rhythm.** Thursday roasting and Friday delivery create a specific weekly identity. Repeat this rhythm through copy, packaging labels, and delivery information.
+**Current concept: A small Minsk roastery with a clear weekly schedule.** Thursday roasting and Friday delivery create a specific identity. The user requested plain language during review: abstract rhythm/ritual slogans, the header tagline, the vertical hero caption, and the phone helper have been removed. Preserve those decisions during integration. The founders' displayed heading uses the approved informal name, Dima.
 
 Use Camera Obscura's scale, strong wordmark, dense typography, and confident photography. Use the brief's green colors and Kvarta's own composition. Use Roast's asymmetrical information panels and Five Elephant's clear subscription explanations where they support the visitor's decision.
 
@@ -253,7 +253,7 @@ The public application has no lead-listing endpoint. Access lead records through
 1. Validate and normalize the phone before entering the persistence layer.
 2. Start a transaction with a consistent connection and read-committed semantics.
 3. Take a PostgreSQL transaction-scoped advisory lock derived deterministically from the canonical phone. All writers use this path; lock collisions may reduce throughput but must not allow duplicates.
-4. After acquiring the lock, get the current database time and check for this phone with creation time strictly newer than ten minutes ago.
+4. After acquiring the lock in a separate statement, get database wall-clock time with `clock_timestamp()` and check for this phone in a fresh Read Committed statement with creation time strictly newer than ten minutes ago. Do not use transaction-start `now()` for a transaction that may have waited on the lock.
 5. If a row exists, return a duplicate result without another insert.
 6. Otherwise insert one lead and commit; only then acknowledge success.
 
@@ -343,7 +343,7 @@ Only after core acceptance and only when the user supplies/authorizes the destin
 - The manager agrees product selection and operational details after the request.
 - Image candidates are not publication-ready until edits and license/source checks are complete.
 - No cart, payment, customer account, dashboard, fake reviews, or news feed is required.
-- Runtime code, credentials, production deployment, actual test results, and final submission evidence do not yet exist.
+- Frontend runtime code, local verification, tests, and the public repository exist. Durable persistence, hosting configuration, public deployment, real-database results, and final submission evidence remain; use the integration plan for current execution status.
 - All authored repository materials use English; final customer-facing copy uses Russian under the assignment's audience requirements.
 
 ## 14. Technical sources checked during planning
@@ -359,76 +359,15 @@ Design specification complete. Implementation should follow the approved palette
 
 ## 15. Backend, release, and submission execution sequence
 
-Execute these steps after the frontend's shared contract and form shell exist. Follow sections 6, 7, and 10 for invariants and verification; do not replace transactional duplicate prevention with a visual button state.
+The [remaining integration plan](integration-plan.md), reviewed against the actual source and live assignment on October 15, is the authoritative execution sequence for unfinished work. It defines files, dependencies, constraints, tests, external dependencies, and completion gates. Application behavior is unchanged by this planning revision.
 
-### B1. Define environment configuration and migration
+| Original milestone | Active steps | Remaining result |
+| --- | --- | --- |
+| B1: configuration and migration | I1–I2 | Environment boundaries, constrained schema, reproducible migration |
+| B2: validation and repository | I1, I3 | Server context sanitization and race-safe durable persistence |
+| B3: HTTP integration | I4 | Correct error boundaries, real acknowledgements, recoverable UI |
+| B4: integration verification | I5 | Actual PostgreSQL concurrency, boundary, rollback, and attribution tests |
+| B5: free hosting | I6 | Isolated preview/production config and a public working form |
+| B6: submission | I7 | Real Lighthouse, authentic AI evidence, concise README, submission links |
 
-Files: `.env.example`, `src/lib/env.ts`, `db/migrations/001-create-leads.sql`.
-
-1. Document server-only `DATABASE_URL`, a separate disposable `TEST_DATABASE_URL`, and public-site metadata configuration `SITE_URL`. Keep Telegram variables absent until that feature is selected.
-2. Validate required database configuration when the endpoint is invoked, not when static page modules are imported. The marketing page must still build and render without a database connection.
-3. Create `leads` with a UUID ID, required normalized phone/name/interest, optional product/comment, database UTC creation timestamp, and bounded attribution JSON. Apply database check constraints for interest and relevant lengths.
-4. Add the `(phone, created_at DESC)` index. Do not create a permanent unique constraint on phone.
-5. Create and apply the migration against the intended database; record how to reproduce it. Keep the application connection string outside commits and client bundles.
-
-**Gate:** schema is reproducible; a direct valid test insert works in an isolated test database; incorrect constrained values fail; the app builds without accessing the database.
-
-### B2. Implement validation and the lead repository
-
-Files: `src/lib/lead-validation.ts`, `src/lib/lead-repository.ts`, server database connection module.
-
-1. Implement the shared field limits, strict Belarusian parsing, E.164 normalization, product-ID validation, and attribution allowlist.
-2. Mark persistence modules server-only and use a connection/driver that supports the entire interactive transaction.
-3. Implement lock, fresh duplicate check, optional insert, and commit on that same transaction connection.
-4. Return only a typed created/duplicate outcome. Roll back failed writes and release resources correctly.
-5. Keep the duplicate decision on database time after lock acquisition. Check the exact ten-minute boundary described in section 6.
-
-**Gate:** concurrent requests for equivalent phone formats create one durable row; a later request outside the window can create another; failures leave no partially accepted lead.
-
-### B3. Implement the HTTP endpoint
-
-File: `src/app/api/lead/route.ts`.
-
-1. Accept only the intended POST JSON contract and enforce a small body limit, for example 16 KiB.
-2. Reject malformed payloads and invalid fields before taking a database lock. Treat network JSON as unknown and parse it with the shared runtime schema.
-3. Invoke the repository and map its outcomes to 201/created or 200/duplicate. Map field errors to 400, oversized input to 413, unavailable persistence to 503.
-4. Apply same-origin checks when an Origin header is present. Add a cheap hidden honeypot only if it fits without reducing accessibility; neither is a substitute for duplicate protection.
-5. Use bounded request timeouts and `Cache-Control: no-store`. Never report created when persistence failed.
-6. Log a request identifier and safe error category, not phone numbers, names, comments, credentials, or full request bodies.
-
-**Gate:** the frontend adapter handles every response; no secret appears in a response or bundle; validation and persistence failures are distinguishable and recoverable.
-
-### B4. Verify the real integration
-
-Files: focused validation tests, repository integration tests, a short browser scenario file or written verification record.
-
-1. Use documented test fixtures; do not send genuine customer data during development.
-2. Exercise canonical phone equivalence, wrong country, invalid length/prefix, simultaneous requests, exact-window expiry, and separate clients sharing the database.
-3. Simulate a slow response, lost acknowledgement, database failure, and retry; confirm the client preserves input and the database still enforces the rule.
-4. Follow an attributed landing URL, choose a product, submit, and compare the saved attribution and selection with the intended values.
-5. Complete browser visual/focus checks at the widths in the frontend plan. Keep meaningful automated checks focused on business invariants and critical interactions.
-
-**Gate:** results are recorded, not inferred; no public test reset endpoint or lead-list endpoint has been introduced.
-
-### B5. Deploy on free hosting
-
-1. Verify account availability and free-plan suitability for Vercel and Neon. Use the existing GitHub repository; do not create a duplicate project or paid resource.
-2. Connect the intended branch, set environment variables in the appropriate preview/production scopes, and apply the migration to the correct database.
-3. Deploy, determine the actual URL, set canonical/OG URL configuration, and redeploy only if configuration changed.
-4. Confirm the site opens without a login barrier intended only for private previews.
-5. Submit a controlled test lead through the deployed form, confirm the durable record, then check its duplicate, invalid-phone, and campaign-attribution behavior.
-6. Record deployment URL and configuration instructions without exposing secret values. If deployment requires a missing account or credential, complete all independent work and name the specific remaining dependency.
-
-**Gate:** the public URL loads, images/fonts resolve, and the hosted endpoint saves a lead in the correct database.
-
-### B6. Package the submission
-
-1. Run a production build, TypeScript check, linter, and the focused tests after the final relevant changes.
-2. Run mobile Lighthouse against the deployed URL, save the real report or screenshot, and fix material regressions. Do not publish an estimated score.
-3. Verify the Open Graph title, description, and image URL; check an actual messenger preview if available.
-4. Complete image source records, documented assumptions, and the actual AI process evidence. Review any public export for secrets or unrelated personal content before publishing it.
-5. Replace the planning-status README with the requested concise implementation account: user work, AI work, a real AI mistake and detection, storage choice, known limits, and how to run/deploy.
-6. Ensure main contains the intended incremental commits and that the repository remains public.
-7. Prepare one submission message containing the live URL, repository URL, AI evidence, Lighthouse report, and README reference. Sending it to the assignment contact is a separate user-authorized action.
-
-**Gate:** every required deliverable is linked and accurate; missing optional features are explicitly documented.
+Current status: frontend and input-validation boundary implemented; all database/release gates remain open. Do not mark B1–B6 or I1–I7 complete merely because the corresponding plan exists.

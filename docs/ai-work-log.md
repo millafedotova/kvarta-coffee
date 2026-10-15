@@ -55,3 +55,10 @@ Record concrete prompts or decisions, work performed by the user, work performed
 - Clarified that failed submissions retain values in the current form; no durable storage is implied.
 - Lint and all 19 existing tests passed. Inspected the revised form at 390 px: no horizontal overflow and no remaining phone helper. See [mobile copy review](screenshots/copy-review-mobile.jpg).
 - Earlier screenshots document the initial frontend milestone; this screenshot records the current copy revision.
+
+## 2026-10-15 — Remaining integration plan review
+
+- Re-read the live assignment and compared it with the current route, validation, attribution, response adapter, tests, environment template, and original backend milestones.
+- Added an ordered integration plan covering schema/migrations, one-client transactions, post-lock database time and fresh snapshots, server context sanitization, parse-versus-storage error boundaries, preview/production origins, isolated tests, deployment, and submission evidence.
+- Corrected outdated planning statements and preserved the user's latest copy/removal decisions. Linked the active remaining-work plan from the README and earlier plans.
+- Checked technical decisions against PostgreSQL, node-postgres, Neon, and Vercel documentation. No database resources, deployment, notifications, or application behavior were changed during this planning review.

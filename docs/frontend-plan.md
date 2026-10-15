@@ -2,6 +2,8 @@
 
 This is the ordered plan for writing the frontend, from the first application file to the deployed form. It supplements the [complete product/backend specification](implementation-plan.md) and [asset preparation plan](assets.md). Frontend implementation has now been completed locally; the original steps below remain the design specification. See [verification and remaining integration work](verification.md) for actual status.
 
+The [remaining integration plan](integration-plan.md) now defines the active database/API/release sequence. Its I1–I7 steps expand the original B1–B6 milestones referenced below. Preserve the user's approved copy revisions and removed captions during that work.
+
 ## 1. Decisions to carry through implementation
 
 - One Russian-language landing page, one shared lead form, no cart or payment.

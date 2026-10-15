@@ -33,6 +33,7 @@ The supplied macro-photo licenses still need source verification before final re
 
 - [Complete implementation plan](docs/implementation-plan.md)
 - [Frontend execution plan](docs/frontend-plan.md)
+- [Remaining integration and release plan](docs/integration-plan.md)
 - [Verification and progress](docs/verification.md)
 - [Palette](docs/palette.svg)
 - [Assets and provenance](docs/assets.md)
