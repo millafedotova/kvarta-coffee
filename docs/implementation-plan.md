@@ -4,7 +4,7 @@
 
 Build a fast, mobile-first landing page for a fictional Minsk roastery. The visitor must understand freshness, choose a product or monthly subscription, and leave a callback request. The manager completes the order.
 
-This document records the original product and backend specification. The frontend is now implemented; see [current verification and progress](verification.md). Persistence and deployment remain future work.
+This document records the original product and backend specification. The frontend and local PostgreSQL integration are implemented; see [current verification and progress](verification.md). The user deferred public deployment and release evidence.
 
 Read this specification together with the [step-by-step frontend plan](frontend-plan.md) and the [remaining integration plan](integration-plan.md). This document defines product requirements; the frontend plan records frontend implementation; the integration plan is the active sequence for database, API, deployment, and submission work. Section 15 maps the original backend milestones to that sequence.
 
@@ -343,7 +343,7 @@ Only after core acceptance and only when the user supplies/authorizes the destin
 - The manager agrees product selection and operational details after the request.
 - Image candidates are not publication-ready until edits and license/source checks are complete.
 - No cart, payment, customer account, dashboard, fake reviews, or news feed is required.
-- Frontend runtime code, local verification, tests, and the public repository exist. Durable persistence, hosting configuration, public deployment, real-database results, and final submission evidence remain; use the integration plan for current execution status.
+- Frontend runtime code, local verification, tests, and the public repository exist. Local durable persistence and real-database results now exist. Hosted configuration, public deployment, and final release evidence remain deferred; use the integration plan for current execution status.
 - All authored repository materials use English; final customer-facing copy uses Russian under the assignment's audience requirements.
 
 ## 14. Technical sources checked during planning
@@ -370,4 +370,4 @@ The [remaining integration plan](integration-plan.md), reviewed against the actu
 | B5: free hosting | I6 | Isolated preview/production config and a public working form |
 | B6: submission | I7 | Real Lighthouse, authentic AI evidence, concise README, submission links |
 
-Current status: frontend and input-validation boundary implemented; all database/release gates remain open. Do not mark B1–B6 or I1–I7 complete merely because the corresponding plan exists.
+Current status: frontend and local B1–B4/I1–I5 integration verified. The user explicitly deferred hosting; B5–B6/I6–I7 gates remain open. Do not mark B1–B6 or I1–I7 complete merely because the corresponding plan exists.

@@ -1,43 +1,29 @@
 # Kvarta Coffee
 
-A responsive Russian-language frontend for a fictional small-batch coffee roastery in Minsk, based on the [assignment](https://tz.vitai.world/). The design uses the brief's deep green palette, an oversized wordmark, photographic panels, and Thursday-roasting/Friday-delivery messaging.
+A Russian-language landing page and working local lead API for a fictional Minsk coffee roastery, based on the [assignment](https://tz.vitai.world/). [Public repository](https://github.com/millafedotova/kvarta-coffee).
 
-**Status:** the frontend is implemented and locally verified. Durable lead storage and public deployment remain the backend/release milestones. The current `/api/lead` validates requests and returns `503 unavailable` for valid leads; it never claims an unsaved lead was received.
+**Status:** frontend and local PostgreSQL integration are implemented. The user deferred public deployment; there is no live public URL or deployed Lighthouse result yet.
 
 ## Run
 
-Use Node.js 24 or newer and npm:
+Requires Node.js 24+, npm, and PostgreSQL tools on PATH:
 
 ```sh
 npm ci
+npm run db:local:start
 npm run dev
 ```
 
-Open the printed local URL. For production verification, run `npm run build`, then `npm start`. Set `SITE_URL` to the actual site origin during deployment so canonical and social URLs resolve correctly. Database credentials are not needed for this frontend stage.
+Open the printed local URL. Stop the database with `npm run db:local:stop`; data remain in ignored `.local/postgres`. Existing env files are preserved. See [database setup](docs/database.md) for configuration, migrations, permissions, and inspection.
 
-## Implemented
+## Behavior and checks
 
-All required content sections, four product selections, subscription selection, one shared form, strict Belarusian phone validation, campaign attribution, pending/success/duplicate/error handling, keyboard focus, responsive CSS, local fonts, optimized images, favicon, and a generated 1200 x 630 social preview. Success and duplicate states require the corresponding validated backend acknowledgement; tests simulate those contracts without creating actual leads.
+The form validates Belarusian numbers, persists contact/interest/product and sanitized campaign context, and acknowledges only committed writes. Transactional phone locks prevent concurrent duplicates for exactly ten minutes; repeats preserve the original record. PostgreSQL was chosen for durable storage across future hosted function instances, where local files are unsuitable.
 
-## Checks
+`npm test` runs 30 unit/component/route tests; `npm run test:integration` runs 10 tests on a separate disposable PostgreSQL database. Build, TypeScript, lint, and formatting checks are provided. Actual results and browser evidence are in [verification](docs/verification.md).
 
-`npm run build`, `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm test`. Nineteen tests cover phone validation, selection preservation, campaign sanitization, request acknowledgements, repeat submits, and the API boundary. See [verification](docs/verification.md) for actual results and remaining work.
+## Process and remaining work
 
-## Process and limitations
+The user supplied the brief/references/photos, chose the green direction, and edited the copy. AI authored the application, tests, docs, and generated package/process imagery. Visual review caught invented city/year text on generated packages. Integration tests caught a required optional URL and focus attempted while form fields were disabled; both were corrected.
 
-The user supplied the brief, selected references/photos, and chose the green direction. AI authored the frontend, tests, documentation, and generated package/process imagery. Image generation initially invented a city/year on packages; visual inspection caught this and the labels were corrected. Browser testing also caught an internal-hostname mismatch in the local API origin check; it was fixed and regression-tested.
-
-The supplied macro-photo licenses still need source verification before final release. No business phone/email, subscription cancellation terms, or delivery cutoff was invented. The next step is transactional PostgreSQL persistence, followed by deployment, real duplicate tests, and the required deployed mobile Lighthouse report.
-
-## Project documents
-
-- [Complete implementation plan](docs/implementation-plan.md)
-- [Frontend execution plan](docs/frontend-plan.md)
-- [Remaining integration and release plan](docs/integration-plan.md)
-- [Verification and progress](docs/verification.md)
-- [Palette](docs/palette.svg)
-- [Assets and provenance](docs/assets.md)
-- [Image prompts](docs/image-prompts.md)
-- [AI work log](docs/ai-work-log.md)
-
-Repository code, comments, documentation, and commits use English; customer-facing copy uses Russian. The submission deadline is October 19, 2026, 18:00 Moscow time.
+Public Vercel/Neon deployment, supplied-photo source verification, deployed Lighthouse, and authentic session evidence remain. No cart, payment, fabricated contact details, or Telegram messaging was added. [Remaining release plan](docs/integration-plan.md), [hosting checklist](docs/deployment.md), [assets/prompts](docs/assets.md), and [AI log](docs/ai-work-log.md) record details. Authored code/docs use English; customer copy uses Russian. Deadline: October 19, 2026, 18:00 Moscow time.

@@ -62,3 +62,17 @@ Record concrete prompts or decisions, work performed by the user, work performed
 - Added an ordered integration plan covering schema/migrations, one-client transactions, post-lock database time and fresh snapshots, server context sanitization, parse-versus-storage error boundaries, preview/production origins, isolated tests, deployment, and submission evidence.
 - Corrected outdated planning statements and preserved the user's latest copy/removal decisions. Linked the active remaining-work plan from the README and earlier plans.
 - Checked technical decisions against PostgreSQL, node-postgres, Neon, and Vercel documentation. No database resources, deployment, notifications, or application behavior were changed during this planning review.
+
+
+## 2026-10-15 — Local PostgreSQL integration
+
+- The user authorized execution of the integration plan, then explicitly limited this run to local integration. Hosting, cloud provisioning, and Telegram were not performed.
+- Added pg/server-only dependencies, runtime env validation, exact Origin configuration, server-side context sanitization, a constrained schema, serialized/checksummed migrations, and restricted application access.
+- Implemented phone-scoped transaction advisory locking with a fresh Read Committed snapshot and database wall-clock time after the lock. Preserved timestamp precision, immutable duplicate details, and commit-before-acknowledgement semantics.
+- Separated parse/validation failures from storage failures and added safe logging/time limits. The endpoint now saves actual local leads instead of returning the frontend milestone's unconditional unavailable response.
+- PostgreSQL initialization initially hit sandbox shared-memory restrictions; the owned cluster was initialized with approved execution access. It was later moved from temporary storage into ignored project-local data, with reproducible start/stop commands.
+- The first integration test run caught a supposedly optional submission URL still being required by the runtime schema; an explicit default fixed it. A later focus regression test caught focus attempted while the fieldset remained disabled; moving focus to the response effect fixed it.
+- Verified 30 unit/component/route tests and 10 real PostgreSQL tests, including independent concurrent clients, microsecond boundary, expiry during lock wait, rollback, timeout, migration drift, and stored attribution.
+- A real local browser request created one synthetic lead; repeat and retry after an actual database stop/restart produced duplicate feedback. Queried row count/campaign/product and restricted-role privileges. No personal customer records or external notification destinations were used.
+- The production build succeeded with database and origin variables explicitly empty. TypeScript, lint, formatting, and production dependency audit also passed. Screenshots and actual results are linked in verification.md.
+- Discovered available Vercel/Neon plugins; they were not installed/connected. A Vercel CLI identity check rejected its token. The user's local-only instruction superseded deployment work, so no hosted form/Lighthouse result was fabricated.

@@ -1,76 +1,64 @@
-# Frontend verification — 2026-10-15
+# Verification — local integration, October 15, 2026
 
-## Scope
+The frontend and local PostgreSQL integration are implemented. The user explicitly deferred hosting; this record makes no public deployment or Lighthouse claim.
 
-The frontend milestone is implemented. This is a local verification record, not a claim that the assignment's complete deployed lead-capture system is finished.
+## Automated checks
 
-The [integration plan reviewed on October 15](integration-plan.md) defines the remaining work and documents gaps found in the current API boundary. Later copy revisions are recorded in the AI work log; the original screenshots and check results below describe the frontend milestone, not a new release measurement.
+| Check                      | Result                                                                        |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `npm test`                 | 30 passed across 6 files                                                      |
+| `npm run test:integration` | 10 passed against actual PostgreSQL 14.20, isolated `kvarta_test`             |
+| `npm run build`            | Passed, including TypeScript; database/site/origin variables explicitly empty |
+| `npm run typecheck`        | Passed                                                                        |
+| `npm run lint`             | Passed                                                                        |
+| `npm run format:check`     | Passed                                                                        |
+| `npm audit --omit=dev`     | Zero production dependency vulnerabilities                                    |
 
-- F01–F12: application, visual system, sections, selection, form, and attribution implemented.
-- F13: typed request transport and response UI implemented and tested; the current validation endpoint deliberately returns unavailable until persistence exists.
-- F14–F17: responsive refinement, accessible structure/focus, asset handling, favicon, and social preview implemented and locally inspected.
-- F03 release gate: generated images are recorded; free-license source verification for user-supplied macro photographs remains.
-- F18 and backend/release B1–B6: durable storage, real server duplicate protection, public deployment, deployed Lighthouse, and final submission remain.
+The full development dependency audit previously reported five findings in the ESLint/fast-glob/micromatch/braces chain. No forced framework downgrade was applied. The build without a site origin warns that social metadata resolves against localhost; configure the real origin before release.
 
-## Automated results
+## PostgreSQL evidence
 
-| Check | Result |
-| --- | --- |
-| `npm run build` | Passed, including the latest CSS changes and TypeScript stage |
-| `npm run typecheck` | Passed; the final production build also checked all current TypeScript |
-| `npm run lint` | Passed |
-| `npm run format:check` | Passed |
-| `npm test` | Passed: 19 tests across 5 files |
-| `npm audit --omit=dev` | Zero production dependency vulnerabilities reported |
-| `git diff --check` | Passed |
+Tests require a dedicated database name ending in `_test`, reject the configured runtime target, and never fall back to runtime credentials. They clean only that disposable test table. Unit route tests mock persistence and cannot write to a real lead database.
 
-The full dependency audit reports five findings in the development-only ESLint/fast-glob/micromatch/braces chain. The package registry did not provide a patched newer braces release when checked. No forced downgrade of the framework/linter was applied. Recheck this chain before changing tooling or adding CI.
+Unit route coverage also checks JSON media type, oversized bodies, unfinished-body timeout, malformed JSON versus failed persistence, deployed configuration errors, exact acknowledgement envelopes, and no-store responses. The server-validation focus test waits for the real response render instead of trying to focus disabled controls.
 
-The local build warns that `SITE_URL` is unset and social metadata falls back to localhost. This is expected in this local stage. Set the real production origin before public deployment and verify canonical/social URLs there.
+Verified on real PostgreSQL:
 
-## Meaningful test coverage
+- Applied migrations twice without duplicate application; detected a changed recorded checksum and restored the isolated fixture.
+- Database constraints reject invalid phone shape; the phone/time index exists.
+- Twelve simultaneous first submissions across independent pools yield one created result, eleven duplicates, and one row.
+- Equivalent phone formats normalize to the same row. Repeat attempts do not overwrite the original comment, interest, attribution, or timestamp.
+- At one microsecond before ten minutes, the predicate detects a duplicate; exactly at ten minutes and one microsecond later it allows a new lead. An aged real row permits another repository insert.
+- A waiting transaction sees the preceding writer's committed row, including when it began before that insert.
+- A lead expiring while another transaction waits is evaluated against post-lock wall-clock time.
+- Failed inserts roll back and release the phone lock. Independent phones succeed. A lock timeout leaves no partially accepted lead and the connection path recovers afterward.
+- All five campaign fields, selected product, comment, sanitized page URLs, and referrer persist through the actual route. A discarded first HTTP acknowledgement followed by retry yields one durable row.
 
-- Valid Belarusian mobile and fixed-line formats, punctuation normalization, wrong country, incomplete input, invalid prefix, and surrounding prose.
-- Required interest, optional empty comment, trimming, limits, and incompatible product/subscription combinations.
-- Campaign URL allowlisting, removal of unrelated queries/credentials/fragments, tab-session preservation, and blocked-storage fallback.
-- Expected 201-created and 200-duplicate acknowledgement contracts; rejection of malformed or mismatched successful responses.
-- Unavailable service versus uncertain network outcome.
-- Preservation of an edited comment/contact fields while switching coffee to subscription.
-- One in-flight client request for repeated submit events and duplicate-receipt display.
-- Local preview Origin handling, unrelated-origin rejection, server field errors, and oversized-body rejection.
+The database was initialized in an owned temporary cluster, then stopped and moved into ignored `.local/postgres`. The local start command applies migrations and uses a restricted runtime role. A direct check confirmed INSERT allowed, UPDATE and schema CREATE denied, and the browser-created lead still present after restart.
 
-Test response fixtures are scoped to the test runner. No fake-success endpoint or demo storage is used by the application.
+## Browser verification
 
-## Browser observations
+The actual local Next.js endpoint was tested from an attributed browser visit:
 
-The local development preview and production build were opened in the Codex browser.
+1. Selected Ethiopia, entered synthetic contact/comment values, and sent the form. The UI confirmed receipt after commit.
+2. Repeated the submit. The UI confirmed a duplicate.
+3. Inspected the database: one row, Ethiopia selected, `utm_source=integration-test`, `utm_campaign=verification`, and `utm_content=browser-01`.
+4. Stopped only the owned local database and sent a valid request. The real unavailable-service response preserved name, phone, comment, and selected product and offered retry.
+5. Restarted the same database and retried. The original row was recognized as duplicate; data survived restart.
 
-| Width | Observed layout |
-| --- | --- |
-| 320 px | No horizontal overflow; navigation, form choices, retry action, and footer remain usable |
-| 390 px | No horizontal overflow; mobile hero, coffee selection, form validation and service-error recovery inspected |
-| 768 px | No horizontal overflow; two-column product/subscription/delivery layout inspected |
-| 1440 px | No horizontal overflow; oversized wordmark and asymmetric hero inspected |
+No external notifications or calls were sent. The synthetic fixture explicitly says not to call.
 
-The rendered page has one H1. All seven rendered photographs loaded and have alternative text. Every input/textarea has an associated label. Keyboard-reachable native links/radios/buttons and explicit focus styling are used. Reduced motion is supported in CSS and in selection scrolling; the OS preference was not changed during testing.
-
-Actual browser actions confirmed product selection, keyboard focus transfer to the request heading, switching to subscription while retaining a comment, rejection of a non-Belarusian number, and a valid synthetic request receiving 503 with preserved values and a retry action. The production build's request also correctly returned unavailable; no lead was stored.
-
-The social-image route returned HTTP 200 with `image/png`; its readable Cyrillic output was inspected at 1200 x 630.
+The initial frontend milestone inspected 320/390/768/1440 px layouts, keyboard selection/focus, labeled inputs, image loading, one H1, and the social-image route. The copy revision rechecked the mobile form at 390 px. The integration preserved layout and removed captions. A new test caught focus being attempted before the disabled form controls were re-enabled; focus now runs after the response render and its regression test passes. A full deployed accessibility/performance measurement remains release work.
 
 ## Screenshots
 
-- [Desktop production first screen](screenshots/desktop.jpg).
-- [Mobile production first screen](screenshots/mobile.jpg).
-- [Mobile production request-error state](screenshots/request-error-mobile.jpg).
+- [Committed local request](screenshots/integration-success.jpg).
+- [Actual database-unavailable state](screenshots/integration-unavailable.jpg).
+- [Duplicate after database recovery](screenshots/integration-duplicate.jpg).
+- [Mobile copy revision](screenshots/copy-review-mobile.jpg).
 
-These screenshots are evidence of the local frontend. They are not a deployed mobile Lighthouse report.
+Earlier desktop/mobile/request-error screenshots document the initial frontend milestone. They are historical and predate subsequent copy changes.
 
-## Required next milestones
+## Remaining release work
 
-1. Create the PostgreSQL schema and interactive transaction-based phone deduplication.
-2. Replace the explicit unavailable boundary with durable persistence; return created only after commit.
-3. Verify simultaneous requests, equivalent formats, and the exact ten-minute window against a disposable real database.
-4. Resolve source licenses or replace the supplied macro photographs before final release.
-5. Deploy on the agreed free hosting, set `SITE_URL`, and check the real public form and campaign records.
-6. Save the actual deployed mobile Lighthouse report and authentic AI-session evidence.
+Public Vercel/Neon connection and deployment, exact hosted Origin/configuration, supplied macro-photo provenance or approved replacements, actual deployed mobile Lighthouse, and authentic AI-session export/screenshots remain deferred. See [database operations](database.md), [hosting checklist](deployment.md), and [integration plan](integration-plan.md).

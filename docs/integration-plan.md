@@ -1,16 +1,16 @@
 # Kvarta Coffee — Remaining Integration Plan
 
-Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. This is an execution plan; unchecked items are not implemented or verified. Deadline: October 19, 2026, 18:00 Moscow time.
+Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. The user subsequently requested local integration only. Local I1–I5 work is implemented and verified; hosted I6–I7 work is deferred. Unchecked items remain release work. Deadline: October 19, 2026, 18:00 Moscow time.
 
 ## 1. Current state and scope
 
-The responsive frontend, approved copy revisions, product/subscription selection, Belarusian phone validation, attribution capture, response adapter, and validation endpoint exist. Nineteen local tests cover the current frontend and API boundary. Success and duplicate UI states are exercised with test fixtures only.
+The responsive frontend, approved copy revisions, product/subscription selection, Belarusian phone validation, sanitized attribution, and PostgreSQL-backed endpoint are implemented. Thirty unit/component/route tests and ten isolated PostgreSQL integration tests pass. A real local browser submission was committed, its repeat was rejected, and recovery after database restart was inspected.
 
-The current endpoint deliberately returns `503 unavailable` for valid input. There is no database driver, migration, persistent lead repository, hosted website, deployed form test, or deployed Lighthouse report. The public repository already exists: [millafedotova/kvarta-coffee](https://github.com/millafedotova/kvarta-coffee).
+The endpoint now returns 201 only after a committed write, 200 for a duplicate, and 503 for unavailable storage/configuration. Migrations, restricted runtime access, and local database start/stop commands exist. Hosting, hosted form verification, and deployed Lighthouse remain deferred by the user. See [database operations](database.md), [verification](verification.md), and [deferred hosting](deployment.md). The public repository already exists: [millafedotova/kvarta-coffee](https://github.com/millafedotova/kvarta-coffee).
 
 Keep the approved design and copy. The founders' heading uses the user's preferred informal name, Dima. Removed photo/header taglines and the phone helper must stay removed. Do not add a cart, payment, authentication, admin UI, analytics service, or notification delivery to the required work.
 
-## 2. Findings from the review
+## 2. Findings from the original review (addressed locally below)
 
 | Finding                                                                      | Required correction                                                                                                               |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -41,17 +41,17 @@ Code, migration files, and tests can be prepared before hosting credentials are 
 
 Files: `src/lib/lead-contract.ts`, `src/lib/lead-validation.ts`, `src/lib/attribution.ts`, new `src/lib/env.ts`, `.env.example`, focused tests.
 
-- [ ] Preserve the existing HTTP result contract: 201/created, 200/duplicate, 400/invalid with safe field errors, 413/too_large, 503/unavailable. Both success outcomes contain no submitted personal information.
-- [ ] Keep name, normalized Belarusian phone, and interest required. Keep the comment empty or optional and normalize an omitted comment to an empty value. Allow a null product for any interest; a non-null product must belong to the catalog and requires `one_time`.
-- [ ] Preserve existing limits: name 100, phone input 64, comment 1000 characters, UTM values 256, URLs 2048, total UTF-8 request body 16 KiB. Do not silently truncate contact fields.
-- [ ] Retain strict `libphonenumber-js/max` validation with country BY and canonical E.164 storage. Do not reduce validation to a prefix/length check or reject valid fixed lines.
-- [ ] Treat attribution as optional context: a missing/null record must not block a valid callback request. Strip unknown campaign keys, remove URL credentials/fragments/unapproved query keys, allow only HTTP(S), and discard invalid context values instead of storing arbitrary strings. Preserve the original referrer when available; absence is valid.
-- [ ] Validate and sanitize restored session attribution as well as newly captured values. Reuse a pure shared URL sanitizer on the server. Distinguish browser-reported `landingUrl` and `submissionUrl`; neither is proof of identity or origin.
-- [ ] Accept absent/null attribution and absent page context from direct clients. Use a known site URL or empty context where appropriate; never infer a missing campaign. Client entry time is optional reporting data, not the database creation time.
-- [ ] Specify server-only `DATABASE_URL` for the pooled runtime connection, `MIGRATION_DATABASE_URL` for the direct migration connection, and `TEST_DATABASE_URL` for an isolated disposable database. Add names and instructions only; never commit actual values or print them in tool output.
-- [ ] Keep `SITE_URL` as the canonical public origin. Add an explicit `LEAD_ALLOWED_ORIGINS` configuration for accepted browser origins, scoped per environment. Local defaults are permitted only locally. Fail closed for a misconfigured deployed endpoint while keeping the marketing page renderable.
-- [ ] For previews, allow only the exact deployment/branch origins obtained from the hosting platform for this project. Do not accept every `*.vercel.app` site or trust arbitrary forwarded-host headers. Production accepts its explicitly configured site origin(s).
-- [ ] Retain rejection of an unrelated supplied Origin; a missing Origin is allowed for direct clients. Origin checking is not authentication or rate limiting.
+- [x] Preserve the existing HTTP result contract: 201/created, 200/duplicate, 400/invalid with safe field errors, 413/too_large, 503/unavailable. Both success outcomes contain no submitted personal information.
+- [x] Keep name, normalized Belarusian phone, and interest required. Keep the comment empty or optional and normalize an omitted comment to an empty value. Allow a null product for any interest; a non-null product must belong to the catalog and requires `one_time`.
+- [x] Preserve existing limits: name 100, phone input 64, comment 1000 characters, UTM values 256, URLs 2048, total UTF-8 request body 16 KiB. Do not silently truncate contact fields.
+- [x] Retain strict `libphonenumber-js/max` validation with country BY and canonical E.164 storage. Do not reduce validation to a prefix/length check or reject valid fixed lines.
+- [x] Treat attribution as optional context: a missing/null record must not block a valid callback request. Strip unknown campaign keys, remove URL credentials/fragments/unapproved query keys, allow only HTTP(S), and discard invalid context values instead of storing arbitrary strings. Preserve the original referrer when available; absence is valid.
+- [x] Validate and sanitize restored session attribution as well as newly captured values. Reuse a pure shared URL sanitizer on the server. Distinguish browser-reported `landingUrl` and `submissionUrl`; neither is proof of identity or origin.
+- [x] Accept absent/null attribution and absent page context from direct clients. Use a known site URL or empty context where appropriate; never infer a missing campaign. Client entry time is optional reporting data, not the database creation time.
+- [x] Specify server-only `DATABASE_URL` for the pooled runtime connection, `MIGRATION_DATABASE_URL` for the direct migration connection, and `TEST_DATABASE_URL` for an isolated disposable database. Add names and instructions only; never commit actual values or print them in tool output.
+- [x] Keep `SITE_URL` as the canonical public origin. Add an explicit `LEAD_ALLOWED_ORIGINS` configuration for accepted browser origins, scoped per environment. Local defaults are permitted only locally. Fail closed for a misconfigured deployed endpoint while keeping the marketing page renderable.
+- [x] For previews, allow only the exact deployment/branch origins obtained from the hosting platform for this project. Do not accept every `*.vercel.app` site or trust arbitrary forwarded-host headers. Production accepts its explicitly configured site origin(s).
+- [x] Retain rejection of an unrelated supplied Origin; a missing Origin is allowed for direct clients. Origin checking is not authentication or rate limiting.
 
 **Gate:** unit tests cover omitted comment/context, invalid phone/product, unknown campaign keys, unsafe URLs, restored-session sanitization, and local/preview/production origin configuration. Existing frontend selection behavior still works.
 
@@ -60,10 +60,10 @@ Files: `src/lib/lead-contract.ts`, `src/lib/lead-validation.ts`, `src/lib/attrib
 Files: new `src/lib/db.ts`, `db/migrations/001-create-leads.sql`, `scripts/migrate.mjs`, `docs/database.md`; update dependencies and scripts.
 
 - [ ] Use PostgreSQL on Neon Free and the Node.js runtime on Vercel, subject to the actual account's free-plan eligibility. Choose `pg` with `@types/pg` and `server-only`; pin installed versions through the lockfile. One small table does not require an ORM.
-- [ ] Use verified TLS settings from the provider's connection instructions. Never disable certificate verification to bypass a connection failure.
-- [ ] Create the pool lazily in a server-only module, with a small per-instance maximum and bounded connection acquisition. Reuse it for warm requests; release each checked-out client in `finally`. Do not connect during static module import/build.
+- [x] Use verified TLS settings from the provider's connection instructions. Never disable certificate verification to bypass a connection failure.
+- [x] Create the pool lazily in a server-only module, with a small per-instance maximum and bounded connection acquisition. Reuse it for warm requests; release each checked-out client in `finally`. Do not connect during static module import/build.
 - [ ] Use the pooled URL for runtime transactions. Use the direct URL for migrations and maintenance. Do not depend on session-level locks/settings across PgBouncer transactions.
-- [ ] Create the following data model. Use explicit columns for manager-readable fields; avoid a single opaque payload blob.
+- [x] Create the following data model. Use explicit columns for manager-readable fields; avoid a single opaque payload blob.
 
 | Column                                                                | Type and rule                                                                                         |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -78,10 +78,10 @@ Files: new `src/lib/db.ts`, `db/migrations/001-create-leads.sql`, `scripts/migra
 | `landing_url`, `submission_url`, `referrer`                           | Sanitized text, empty/nullable when unavailable, bounded at 2048 characters                           |
 | `entered_at`                                                          | Nullable `timestamptz`, browser-reported entry time; never used for deduplication                     |
 
-- [ ] Add an index on `(phone, created_at DESC)`. No permanent unique constraint on phone and no ten-minute bucket key.
-- [ ] Apply migrations explicitly with a documented `npm run db:migrate` command. Record migration version/checksum so re-running skips applied files and fails on changed applied migrations. Serialize concurrent migration attempts. Do not migrate inside request handling or on every Vercel build.
-- [ ] The runtime database role has only the access needed for lookup/insert; migration credentials are separate and never present in the browser or required by normal requests.
-- [ ] Document how the manager uses the authenticated Neon console to see contact, interest/product, timestamp, campaign, and page context. No public lead listing or unauthenticated export.
+- [x] Add an index on `(phone, created_at DESC)`. No permanent unique constraint on phone and no ten-minute bucket key.
+- [x] Apply migrations explicitly with a documented `npm run db:migrate` command. Record migration version/checksum so re-running skips applied files and fails on changed applied migrations. Serialize concurrent migration attempts. Do not migrate inside request handling or on every Vercel build.
+- [x] The runtime database role has only the access needed for lookup/insert; migration credentials are separate and never present in the browser or required by normal requests.
+- [x] Document how the manager uses the authenticated Neon console to see contact, interest/product, timestamp, campaign, and page context. No public lead listing or unauthenticated export.
 
 **Gate:** apply the migration to an empty isolated database, apply it again safely, verify constraints and index, and build the site with no database variables. Confirm a database role can persist/read the intended test fields.
 
@@ -91,14 +91,14 @@ File: new `src/lib/lead-repository.ts`; integration tests in `tests/integration/
 
 The rule applies to the same canonical phone across every interest/product, worker, tab, and application instance. A duplicate does not overwrite the original lead, campaign, or creation time and does not extend its ten-minute window.
 
-- [ ] Check out one client and begin a Read Committed transaction. Every statement through commit uses that client, never independent `pool.query` calls.
-- [ ] Acquire a transaction-scoped advisory lock with a deterministic signed 64-bit key derived from a fixed namespace plus the canonical phone. Use `pg_advisory_xact_lock`, not a session-level lock. Hash collisions may serialize unrelated numbers but cannot bypass the phone lookup.
-- [ ] Acquire the lock in its own statement. After it returns, obtain `clock_timestamp()` once as the decision time. Query for recent leads in a subsequent statement, so its snapshot includes the preceding lock holder's commit.
-- [ ] Treat a stored lead as duplicate when its `created_at` is strictly newer than decision time minus ten minutes. At exactly ten minutes, allow a new lead. Use database timestamp precision throughout; do not round-trip the decision through a JavaScript millisecond `Date`.
-- [ ] If no duplicate exists, insert the validated record with that same database decision timestamp. Commit before returning `created`. A duplicate also completes its transaction before returning.
-- [ ] On failure, roll back and release/destroy the client as appropriate. Never reuse a client in a failed or unknown transaction state. Parameterize values; do not interpolate user text into SQL.
-- [ ] Bound connection, lock, statement, and total operation time. Target a server operation under 12 seconds, inside the existing 15-second browser timeout; check cold-start behavior rather than assuming this budget works. Set transaction-local database limits and ensure a deadline actually cancels/terminates outstanding work. `Promise.race` alone is insufficient cleanup.
-- [ ] A lost commit acknowledgement has an uncertain outcome. Return no false success; a retry uses the same phone and the same duplicate rule. The UI must allow for the possibility that the lead was saved.
+- [x] Check out one client and begin a Read Committed transaction. Every statement through commit uses that client, never independent `pool.query` calls.
+- [x] Acquire a transaction-scoped advisory lock with a deterministic signed 64-bit key derived from a fixed namespace plus the canonical phone. Use `pg_advisory_xact_lock`, not a session-level lock. Hash collisions may serialize unrelated numbers but cannot bypass the phone lookup.
+- [x] Acquire the lock in its own statement. After it returns, obtain `clock_timestamp()` once as the decision time. Query for recent leads in a subsequent statement, so its snapshot includes the preceding lock holder's commit.
+- [x] Treat a stored lead as duplicate when its `created_at` is strictly newer than decision time minus ten minutes. At exactly ten minutes, allow a new lead. Use database timestamp precision throughout; do not round-trip the decision through a JavaScript millisecond `Date`.
+- [x] If no duplicate exists, insert the validated record with that same database decision timestamp. Commit before returning `created`. A duplicate also completes its transaction before returning.
+- [x] On failure, roll back and release/destroy the client as appropriate. Never reuse a client in a failed or unknown transaction state. Parameterize values; do not interpolate user text into SQL.
+- [x] Bound connection, lock, statement, and total operation time. Target a server operation under 12 seconds, inside the existing 15-second browser timeout; check cold-start behavior rather than assuming this budget works. Set transaction-local database limits and ensure a deadline actually cancels/terminates outstanding work. `Promise.race` alone is insufficient cleanup.
+- [x] A lost commit acknowledgement has an uncertain outcome. Return no false success; a retry uses the same phone and the same duplicate rule. The UI must allow for the possibility that the lead was saved.
 
 **Gate:** two independent clients/pools sending concurrent equivalent phone formats create exactly one row. Verify first-writer rollback, lock release, duplicate immutability, other-phone independence, and expiry behavior. Do not use in-memory locks or a mocked database as proof.
 
@@ -106,16 +106,16 @@ The rule applies to the same canonical phone across every interest/product, work
 
 Files: `src/app/api/lead/route.ts`, `src/lib/submit-lead.ts`, `src/components/lead-flow.tsx`, `src/components/lead-form.tsx`; route/adapter tests.
 
-- [ ] Explicitly use the Node.js route runtime for the selected database driver.
-- [ ] Preserve bounded streaming-body parsing. Detect JSON media type correctly, including UTF-8 charset, and reject unrelated types. Reject malformed JSON/body read errors before calling the repository.
-- [ ] Separate Origin/configuration, parsing, schema validation, and persistence error boundaries. Bad input returns 400; missing/invalid server config and database/connect/lock failures return 503. A malformed `SITE_URL` must not be presented as a visitor's field error.
-- [ ] Call the repository with canonical values and sanitized attribution. Replace the current deliberate 503 only after real persistence exists.
-- [ ] Keep exact status/envelope pairs and `Cache-Control: no-store` on every response. Never return credentials, database messages, a prior lead's name/comment, or a public record identifier to prove a duplicate.
-- [ ] Retain request identifiers and safe error categories for operations; never log raw request bodies, connection strings, phone numbers, comments, or full advertising URLs.
-- [ ] When the server returns field errors, move focus to the first invalid field as client validation already does. When invalid context/origin leaves no field error, use general recovery guidance rather than telling the visitor to fix nonexistent highlighted fields.
-- [ ] Keep contact/comment/selection on failure. Distinguish an unavailable service from an unconfirmed submission; an unavailable response after an uncertain commit must not assert that nothing was stored. Say values remain in the form, not durably saved.
-- [ ] Check that the broad duplicate message also makes sense for a question or changed selection. No callback deadline or automatic payment/subscription promise.
-- [ ] Keep abuse controls proportional: body limits, validation, bounded DB work, and Origin checks are required here. CAPTCHA, paid rate-limit services, hidden fake-success honeypots, and Telegram are not prerequisites for the assignment.
+- [x] Explicitly use the Node.js route runtime for the selected database driver.
+- [x] Preserve bounded streaming-body parsing. Detect JSON media type correctly, including UTF-8 charset, and reject unrelated types. Reject malformed JSON/body read errors before calling the repository.
+- [x] Separate Origin/configuration, parsing, schema validation, and persistence error boundaries. Bad input returns 400; missing/invalid server config and database/connect/lock failures return 503. A malformed `SITE_URL` must not be presented as a visitor's field error.
+- [x] Call the repository with canonical values and sanitized attribution. Replace the current deliberate 503 only after real persistence exists.
+- [x] Keep exact status/envelope pairs and `Cache-Control: no-store` on every response. Never return credentials, database messages, a prior lead's name/comment, or a public record identifier to prove a duplicate.
+- [x] Retain request identifiers and safe error categories for operations; never log raw request bodies, connection strings, phone numbers, comments, or full advertising URLs.
+- [x] When the server returns field errors, move focus to the first invalid field as client validation already does. When invalid context/origin leaves no field error, use general recovery guidance rather than telling the visitor to fix nonexistent highlighted fields.
+- [x] Keep contact/comment/selection on failure. Distinguish an unavailable service from an unconfirmed submission; an unavailable response after an uncertain commit must not assert that nothing was stored. Say values remain in the form, not durably saved.
+- [x] Check that the broad duplicate message also makes sense for a question or changed selection. No callback deadline or automatic payment/subscription promise.
+- [x] Keep abuse controls proportional: body limits, validation, bounded DB work, and Origin checks are required here. CAPTCHA, paid rate-limit services, hidden fake-success honeypots, and Telegram are not prerequisites for the assignment.
 
 **Gate:** a valid local request returns 201 and has a committed row; its repeat returns 200 with no extra row. Bad phone returns 400 with a field error; oversized body returns 413; unavailable storage returns 503; the browser shows each state honestly.
 
@@ -123,15 +123,15 @@ Files: `src/app/api/lead/route.ts`, `src/lib/submit-lead.ts`, `src/components/le
 
 Files: `vitest.integration.config.mts`, `tests/integration/`, package scripts, `docs/verification.md`.
 
-- [ ] Add a separate `npm run test:integration` command requiring `TEST_DATABASE_URL`. Refuse to run write/cleanup fixtures against the runtime database target. Do not silently substitute `DATABASE_URL` or report skipped tests as passed.
-- [ ] Use an isolated test database/schema and documented synthetic fixtures; fixtures must never trigger real calls or external notifications. Any cleanup is scoped to the explicitly disposable test environment.
-- [ ] Launch concurrent requests from separate connections: exactly one created result and the rest duplicate; database row count is one.
-- [ ] Test equivalent valid phone formatting, all three interests, selected product/null product, preserved comment, separate phones, and attempts to change details inside the protected window. The first record remains unchanged.
-- [ ] Verify the boundary predicate at an exactly controlled decision timestamp: immediately before ten minutes is duplicate, exactly ten minutes is allowed, later is allowed. Keep the test seam internal; never accept a caller-supplied clock in the public endpoint. Also test the real repository after arranging older timestamps, without a ten-minute sleep.
-- [ ] Force one transaction to wait behind another and confirm it sees the committed lead. Cover the case where the waiting transaction started before the first lead was inserted; this detects stale transaction-time/snapshot bugs.
-- [ ] Exercise failed insert/rollback, database unavailable, lock timeout, and connection release. For a lost HTTP response after commit, retry and assert there is still one row.
-- [ ] Round-trip every UTM field, landing/submission URL, referrer, entry time, selected product, and comment into PostgreSQL. Test direct traffic, blocked session storage, unsafe/tampered URL context, and anchor navigation.
-- [ ] Verify browser success, duplicate, server validation focus, pending double-submit, and recovery from temporary failure. Record a real database query result with synthetic data as evidence; do not expose real leads in screenshots.
+- [x] Add a separate `npm run test:integration` command requiring `TEST_DATABASE_URL`. Refuse to run write/cleanup fixtures against the runtime database target. Do not silently substitute `DATABASE_URL` or report skipped tests as passed.
+- [x] Use an isolated test database/schema and documented synthetic fixtures; fixtures must never trigger real calls or external notifications. Any cleanup is scoped to the explicitly disposable test environment.
+- [x] Launch concurrent requests from separate connections: exactly one created result and the rest duplicate; database row count is one.
+- [x] Test equivalent valid phone formatting, all three interests, selected product/null product, preserved comment, separate phones, and attempts to change details inside the protected window. The first record remains unchanged.
+- [x] Verify the boundary predicate at an exactly controlled decision timestamp: immediately before ten minutes is duplicate, exactly ten minutes is allowed, later is allowed. Keep the test seam internal; never accept a caller-supplied clock in the public endpoint. Also test the real repository after arranging older timestamps, without a ten-minute sleep.
+- [x] Force one transaction to wait behind another and confirm it sees the committed lead. Cover the case where the waiting transaction started before the first lead was inserted; this detects stale transaction-time/snapshot bugs.
+- [x] Exercise failed insert/rollback, database unavailable, lock timeout, and connection release. For a lost HTTP response after commit, retry and assert there is still one row.
+- [x] Round-trip every UTM field, landing/submission URL, referrer, entry time, selected product, and comment into PostgreSQL. Test direct traffic, blocked session storage, unsafe/tampered URL context, and anchor navigation.
+- [x] Verify browser success, duplicate, server validation focus, pending double-submit, and recovery from temporary failure. Record a real database query result with synthetic data as evidence; do not expose real leads in screenshots.
 
 **Gate:** record commands, actual results, and database isolation method. Update the verification document only for checks actually run. No public cleanup/reset route is introduced.
 
@@ -173,7 +173,7 @@ Files: hosting configuration, `docs/deployment.md`, `.env.example`, asset source
 4. `chore: configure deployment and record hosted form verification` — I6.
 5. `docs: add release measurements and submission evidence` — I7.
 
-Use these boundaries only when the corresponding work is complete. Current plan updates do not mark these milestones achieved.
+Use these boundaries only when the corresponding work is complete. Only the local database/API/test work is now implemented. Hosting and submission milestones remain open at the user's request.
 
 ## 5. External dependencies to resolve when execution starts
 

@@ -1,6 +1,6 @@
 # Kvarta Coffee — Frontend Implementation Sequence
 
-This is the ordered plan for writing the frontend, from the first application file to the deployed form. It supplements the [complete product/backend specification](implementation-plan.md) and [asset preparation plan](assets.md). Frontend implementation has now been completed locally; the original steps below remain the design specification. See [verification and remaining integration work](verification.md) for actual status.
+This is the ordered plan for writing the frontend, from the first application file to the deployed form. It supplements the [complete product/backend specification](implementation-plan.md) and [asset preparation plan](assets.md). Frontend and local database integration have now been completed; the original steps below remain the design specification. See [verification and remaining integration work](verification.md) for actual status.
 
 The [remaining integration plan](integration-plan.md) now defines the active database/API/release sequence. Its I1–I7 steps expand the original B1–B6 milestones referenced below. Preserve the user's approved copy revisions and removed captions during that work.
 
@@ -388,8 +388,8 @@ Use these boundaries when their work is actually complete. Combine tiny adjacent
 - [x] Every navigation link and product/subscription CTA works.
 - [x] Selection and draft state are shared, valid, and preserved correctly.
 - [x] Form has permanent labels, appropriate phone handling, and all request states.
-- [ ] Success requires the actual server's durable confirmation.
-- [ ] Campaign/page context is captured and saved with the lead.
+- [x] Success requires the actual server's durable confirmation.
+- [x] Campaign/page context is captured and saved with the lead.
 - [x] 320/390/768/1440 px views and keyboard flow have been inspected.
 - [ ] Final contrast, focus, alternative text, and reduced motion have been checked.
 - [ ] Production assets/fonts, metadata, preview, and live form have been verified.
