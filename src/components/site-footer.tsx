@@ -11,7 +11,7 @@ export function SiteFooter() {
             КВАРТА<span aria-hidden="true">✳</span>
           </a>
           <p>
-            Кофе в своём ритме.
+            Кофе в зерне и дрипах.
             <br />
             Обжарка в Минске с 2019 года.
           </p>

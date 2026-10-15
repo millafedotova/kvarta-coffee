@@ -33,14 +33,14 @@ export function LeadForm() {
     >
       <Container className={styles.grid}>
         <div className={styles.copy}>
-          <span className="eyebrow">05 / ДАВАЙТЕ ЗНАКОМИТЬСЯ</span>
+          <span className="eyebrow">05 / ЗАЯВКА</span>
           <h2 id="request-heading" tabIndex={-1}>
-            Ваш кофе.
+            Заказать кофе
             <br />
-            Ваш ритм.
+            или задать вопрос.
           </h2>
           <p>
-            Оставьте заявку — перезвоним, поможем выбрать кофе и договоримся о
+            Оставьте номер — позвоним, поможем выбрать кофе и договоримся о
             доставке.
           </p>
           <div className={styles.note}>
@@ -48,9 +48,9 @@ export function LeadForm() {
               ✳
             </span>
             <span>
-              Без корзины и сложных решений.
+              Не знаете, какой кофе взять?
               <br />
-              Просто поговорим о вашем кофе.
+              Расскажите, как обычно его готовите.
             </span>
           </div>
         </div>
@@ -107,11 +107,8 @@ export function LeadForm() {
                 onChange={(event) => flow.edit("phone", event.target.value)}
                 onBlur={() => flow.validateField("phone")}
                 aria-invalid={Boolean(flow.errors.phone)}
-                aria-describedby={`phone-hint${flow.errors.phone ? " error-phone" : ""}`}
+                aria-describedby={flow.errors.phone ? "error-phone" : undefined}
               />
-              <p id="phone-hint" className={styles.hint}>
-                Белорусский номер — на него мы перезвоним.
-              </p>
               {flow.errors.phone ? (
                 <p id="error-phone" className={styles.error}>
                   {flow.errors.phone}

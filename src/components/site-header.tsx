@@ -19,10 +19,8 @@ export function SiteHeader() {
             КВАРТА<span className={styles.wordmarkDot}>✳</span>
           </a>
           <div className={styles.baseline}>
-            <span>У хорошего кофе есть свой ритм.</span>
-            <span className={styles.smallNote}>
-              МАЛЕНЬКИЕ ПАРТИИ. БОЛЬШИЕ УТРА.
-            </span>
+            <span>Обжариваем сами. Привозим по Минску.</span>
+            <span className={styles.smallNote}>ЗЕРНО · ДРИПЫ · ПОДПИСКА</span>
           </div>
         </Container>
       </header>

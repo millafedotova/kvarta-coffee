@@ -36,14 +36,14 @@ export const draftSchema = z
       .string()
       .trim()
       .min(1, "Как к вам обращаться?")
-      .max(100, "Имя должно быть короче 100 символов."),
+      .max(100, "Введите имя не длиннее 100 символов."),
     phone: phoneSchema,
     interest: z.enum(interests, { error: "Выберите, что вас интересует." }),
     productId: productIdSchema,
     comment: z
       .string()
       .trim()
-      .max(1000, "Комментарий должен быть короче 1000 символов."),
+      .max(1000, "Сократите комментарий до 1000 символов."),
   })
   .superRefine((value, context) => {
     if (value.interest !== "one_time" && value.productId !== null) {

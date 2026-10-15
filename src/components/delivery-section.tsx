@@ -14,16 +14,15 @@ export function DeliverySection() {
           <div>
             <span className="eyebrow">04 / ДОСТАВКА И САМОВЫВОЗ</span>
             <h2 id="delivery-heading">
-              Увидимся в пятницу.
-              <br />
-              Или у нас.
+              Доставка
+              <br />и самовывоз.
             </h2>
           </div>
         </div>
         <div className={styles.grid}>
           <article className={styles.card}>
             <div className={styles.cardTop}>
-              <span className="eyebrow">КОФЕ ПРИЕДЕТ К ВАМ</span>
+              <span className="eyebrow">ДОСТАВКА</span>
               <span aria-hidden="true" className={styles.symbol}>
                 ↗
               </span>
@@ -44,7 +43,7 @@ export function DeliverySection() {
           </article>
           <article className={`${styles.card} ${styles.pickup}`}>
             <div className={styles.cardTop}>
-              <span className="eyebrow">ЗАГЛЯДЫВАЙТЕ В МАСТЕРСКУЮ</span>
+              <span className="eyebrow">САМОВЫВОЗ</span>
               <span aria-hidden="true" className={styles.symbol}>
                 ＋
               </span>

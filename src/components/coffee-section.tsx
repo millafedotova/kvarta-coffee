@@ -14,11 +14,12 @@ export function CoffeeSection() {
         <div className="sectionHeading">
           <div>
             <span className="eyebrow">01 / НАШ КОФЕ</span>
-            <h2 id="coffee-heading">Найдите свой вкус.</h2>
+            <h2 id="coffee-heading">Зерно и дрипы.</h2>
           </div>
           <p>
-            Для утренней чашки, рабочего дня
-            <br />и паузы, которая нужна именно вам.
+            Цветы и бергамот, карамель или шоколад —
+            <br />
+            выбирайте, что вам ближе.
           </p>
         </div>
         <div className={styles.grid}>

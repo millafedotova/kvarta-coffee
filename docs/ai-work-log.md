@@ -45,3 +45,13 @@ Record concrete prompts or decisions, work performed by the user, work performed
 - Updated Node typings to match the actual Node 24 runtime instead of forcing an incompatible testing dependency resolution.
 - Ran meaningful tests, lint/type/build checks, checked image labels/social preview, and inspected responsive layouts and actual API failure feedback. Detailed evidence is in verification.md.
 - Durable database storage, real ten-minute server duplicate protection, public deployment, deployed Lighthouse, and final submission remain the following milestones.
+
+## 2026-10-15 — Plain-language copy revision
+
+- Reviewed all rendered copy and social metadata at the user's request. Replaced abstract rhythm, ritual, morning, and personal-attention slogans with product details, roasting dates, delivery terms, and direct actions.
+- Used the user's exact two-sentence wording for the founders' story.
+- Changed the founders' heading to the user's preferred informal name, Dima.
+- Removed the phone helper sentence requested by the user and its accessibility description reference. The phone example, validation, and linked error remain.
+- Clarified that failed submissions retain values in the current form; no durable storage is implied.
+- Lint and all 19 existing tests passed. Inspected the revised form at 390 px: no horizontal overflow and no remaining phone helper. See [mobile copy review](screenshots/copy-review-mobile.jpg).
+- Earlier screenshots document the initial frontend milestone; this screenshot records the current copy revision.

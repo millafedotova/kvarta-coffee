@@ -53,7 +53,7 @@ export default function OpenGraphImage() {
         }}
       >
         <span>НЕБОЛЬШИЕ ПАРТИИ ПО 5 КГ</span>
-        <span>КОФЕ В СВОЁМ РИТМЕ</span>
+        <span>ЗЕРНО · ДРИПЫ · ПОДПИСКА</span>
       </div>
     </div>,
     size,

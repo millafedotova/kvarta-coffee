@@ -12,14 +12,12 @@ export function SubscriptionSection() {
           <div className={styles.copy}>
             <span className="eyebrow">02 / ПОДПИСКА НА КОФЕ</span>
             <h2 id="subscription-heading">
-              Пусть кофе
+              Две пачки
               <br />
-              будет всегда.
+              каждый месяц.
             </h2>
             <p className={styles.description}>
-              Две свежие пачки каждый месяц.
-              <br />
-              Одной заботой в вашем дне меньше.
+              Подписка на кофе с доставкой по Минску.
             </p>
             <div className={styles.offer}>
               <strong>
@@ -52,17 +50,16 @@ export function SubscriptionSection() {
           <div className={styles.photo}>
             <Image
               src="/images/coffee-foam.jpg"
-              alt="Тёплые кофейные оттенки и пенка в чашке"
+              alt="Кофейная пенка крупным планом"
               fill
               sizes="(max-width: 767px) 100vw, 45vw"
               className={styles.image}
             />
             <div className={styles.caption}>
-              <span className="eyebrow">ВАШ ЕЖЕДНЕВНЫЙ РИТУАЛ</span>
+              <span className="eyebrow">ПОДПИСКА НА КОФЕ</span>
               <span>
-                Хорошее утро
-                <br />
-                начинается здесь.
+                54 BYN
+                <br />в месяц.
               </span>
             </div>
           </div>

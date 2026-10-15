@@ -13,7 +13,7 @@ export function RoastSchedule() {
           <div>
             <span className="eyebrow">КАЖДУЮ НЕДЕЛЮ</span>
             <h2>Обжариваем в четверг</h2>
-            <p>Небольшая партия. Внимание к каждому зерну.</p>
+            <p>Каждую неделю, партиями по 5 кг.</p>
           </div>
         </div>
         <div className={`${styles.day} ${styles.dark}`}>

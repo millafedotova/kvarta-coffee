@@ -19,18 +19,18 @@ export function Hero() {
             </span>
           </h1>
           <p>
-            Свежий кофе для ваших обычных и особенных дней. Обжариваем по 5 кг —
-            зерно приезжает к вам на 1–3 день после обжарки.
+            Обжариваем кофе небольшими партиями по 5 кг. Вы получаете зерно
+            через 1–3 дня после обжарки.
           </p>
           <div className={styles.actions}>
             <a className={actions.button} href="#coffee">
-              Выбрать свой кофе{" "}
+              Выбрать кофе{" "}
               <span className={actions.arrow} aria-hidden="true">
                 ↗
               </span>
             </a>
             <a className={actions.textLink} href="#subscription">
-              Или оформить подписку
+              Оформить подписку
             </a>
           </div>
         </div>
@@ -44,12 +44,12 @@ export function Hero() {
             className={styles.image}
           />
           <div className={styles.photoLabel}>
-            <span className="eyebrow">НАШ МАСШТАБ</span>
+            <span className="eyebrow">ОДНА ПАРТИЯ</span>
             <strong>5 кг</strong>
             <span>
-              в каждой партии.
+              обжариваем
               <br />
-              Каждой — своё внимание.
+              за один раз.
             </span>
           </div>
           <span className={styles.photoSide}>

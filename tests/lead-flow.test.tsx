@@ -54,7 +54,7 @@ it("retains values and offers retry when the actual transport reports unavailabl
   await user.type(screen.getByLabelText(/Телефон/), "+375291234567");
   await user.click(screen.getByLabelText("Есть вопрос"));
   await user.click(screen.getByRole("button", { name: /Оставить заявку/ }));
-  await screen.findByText(/Сервис временно недоступен/);
+  await screen.findByText(/Не получилось отправить заявку/);
   expect((screen.getByLabelText(/Телефон/) as HTMLInputElement).value).toBe(
     "+375291234567",
   );
