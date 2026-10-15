@@ -1,8 +1,10 @@
 # Kvarta Coffee
 
-A Russian-language landing page and working local lead API for a fictional Minsk coffee roastery, based on the [assignment](https://tz.vitai.world/). [Public repository](https://github.com/millafedotova/kvarta-coffee).
+A Russian-language landing page and working lead API for a fictional Minsk coffee roastery, based on the [assignment](https://tz.vitai.world/). [Live site](https://kvarta-coffee-five.vercel.app) · [Public repository](https://github.com/millafedotova/kvarta-coffee).
 
-**Status:** frontend and local PostgreSQL integration are implemented. The user deferred public deployment; there is no live public URL or deployed Lighthouse result yet.
+**Status:** deployed on Vercel with PostgreSQL on Neon. The public URL opens without login. A real browser submission stored one synthetic lead with product and campaign context; repeating it preserved the same row.
+
+Mobile Lighthouse: **95 performance / 100 accessibility / 100 best practices / 100 SEO**. [Actual report](docs/lighthouse/mobile-2026-10-15.html).
 
 ## Run
 
@@ -26,4 +28,4 @@ The form validates Belarusian numbers, persists contact/interest/product and san
 
 The user supplied the brief/references/photos, chose the green direction, and edited the copy. AI authored the application, tests, docs, and generated package/process imagery. Visual review caught invented city/year text on generated packages. Integration tests caught a required optional URL and focus attempted while form fields were disabled; both were corrected.
 
-Public Vercel/Neon deployment and deployed Lighthouse remain outside the current local milestone. The user confirmed ownership of the supplied photos and excluded further AI-session packaging. No cart, payment, fabricated contact details, or Telegram messaging was added. [Remaining release plan](docs/integration-plan.md), [hosting checklist](docs/deployment.md), [assets/prompts](docs/assets.md), and [AI log](docs/ai-work-log.md) record details. Authored code/docs use English; customer copy uses Russian. Deadline: October 19, 2026, 18:00 Moscow time.
+Deployment currently uses the Vercel CLI; automatic GitHub deployments require a GitHub login connection in the Vercel account. The user confirmed ownership of the supplied photos and excluded further AI-session packaging. No cart, payment, fabricated contact details, or Telegram messaging was added. [Release verification](docs/verification.md), [hosting operations](docs/deployment.md), and [assets/prompts](docs/assets.md) record details. Authored code/docs use English; customer copy uses Russian. Deadline: October 19, 2026, 18:00 Moscow time.

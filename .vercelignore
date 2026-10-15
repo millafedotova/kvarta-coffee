@@ -1,0 +1,14 @@
+.git/
+.local/
+.env
+.env.*
+.vercel/
+node_modules/
+.next/
+private-assets/
+private-session-exports/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.tsbuildinfo

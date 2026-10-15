@@ -1,6 +1,6 @@
-# Verification — local integration, October 15, 2026
+# Verification — October 15, 2026
 
-The frontend and local PostgreSQL integration are implemented. The user explicitly deferred hosting; this record makes no public deployment or Lighthouse claim.
+The frontend, local PostgreSQL integration, and Vercel/Neon production deployment are implemented. Historical local checks and current hosted checks are distinguished below.
 
 ## Automated checks
 
@@ -61,7 +61,35 @@ Earlier desktop/mobile/request-error screenshots document the initial frontend m
 
 ## Remaining release work
 
-Public Vercel/Neon connection and deployment, exact hosted Origin/configuration, and actual deployed mobile Lighthouse remain deferred. The user confirmed ownership of the supplied photos and excluded further AI-session packaging. See [database operations](database.md), [hosting checklist](deployment.md), and [integration plan](integration-plan.md).
+Automatic Git deployments require a GitHub login connection in the Vercel account; CLI deployment works. Mobile Lighthouse results are recorded separately when measured. The user confirmed ownership of the supplied photos and excluded further AI-session packaging. See [database operations](database.md), [hosting operations](deployment.md), and [integration plan](integration-plan.md).
+
+## Hosted verification
+
+- URL: https://kvarta-coffee-five.vercel.app; release deployment `dpl_5MhUej6G5ZJh7j2mWfRikqFhnytK` reached Ready on October 15, 2026.
+- The Vercel cloud build completed successfully, including Next.js compilation, TypeScript, prerendered pages, and the Node.js lead function. Node.js 24.x is configured; functions are configured in Frankfurt alongside PostgreSQL.
+- A request without cookies or authorization returned HTTP 200, HTML content, and no login redirect. Vercel authentication remains enabled for generated deployment URLs.
+- The production origin is explicitly allowed, the canonical site URL is configured, and only the restricted pooled runtime connection is stored in Vercel Production. Preview/Development have no production database credentials.
+- An actual browser visit with `utm_source=deployment-check`, `utm_medium=qa`, and `utm_campaign=release-2026-10-15` selected Ethiopia and submitted a synthetic do-not-call lead. The UI confirmed receipt. A direct database read verified one committed row, the selected product, all three campaign values, and both public page URLs.
+- A repeated browser submit displayed duplicate feedback. The database still contained one row with the same ID, timestamp, product, and campaign fields. The synthetic record was retained.
+- A deployment dry run verified zero included env files or local database/secret files. The pooled application connection authenticated as `kvarta_app`; SELECT/INSERT were allowed and UPDATE/DELETE/schema CREATE were denied.
+- [Hosted submission screenshot](screenshots/hosted-success.png).
+- [Duplicate feedback](screenshots/hosted-duplicate.png), [desktop](screenshots/hosted-desktop.png), and [mobile](screenshots/hosted-mobile.png) screenshots document the actual hosted release. Widths 320/390/768/1440 each had no horizontal overflow and exactly one H1.
+- Anonymous metadata checks found the correct canonical origin and absolute Open Graph image URL, no localhost URLs in the page, a successful SVG icon, and a successful 1200 × 630 PNG social image.
+
+## Hosted mobile Lighthouse
+
+Measured at 11:53:55 UTC on October 15, 2026 using Lighthouse 13.5.0 and headless Chrome against https://kvarta-coffee-five.vercel.app/. This was the default mobile simulation: 412 × 823 CSS pixels, 4× CPU slowdown, simulated 150 ms RTT and 1638.4 Kbps throughput. This is one lab run, not a field-data guarantee.
+
+| Category | Score |
+| --- | --- |
+| Performance | 95 |
+| Accessibility | 100 |
+| Best practices | 100 |
+| SEO | 100 |
+
+FCP: 1.5 s; LCP: 2.8 s; total blocking time: 10 ms; CLS: 0.003; speed index: 1.6 s. Lighthouse suggests further JavaScript, CSS, and image-delivery savings; no application change or repeated run was needed to meet the internal performance goal of 90.
+
+Actual reports: [HTML](lighthouse/mobile-2026-10-15.html), [JSON](lighthouse/mobile-2026-10-15.json). Reports were checked for the configured connection strings/passwords before inclusion; none were present. Cold suspension was not deliberately forced, so no forced-cold-start measurement is claimed.
 
 ## Follow-up fixes from the independent review
 

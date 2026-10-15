@@ -1,12 +1,12 @@
 # Kvarta Coffee — Remaining Integration Plan
 
-Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. The user subsequently requested local integration only, confirmed ownership of the supplied photographs, and excluded further AI-session packaging. Local I1–I5 work is implemented and verified; hosted I6–I7 work is deferred. Unchecked items remain release work. Deadline: October 19, 2026, 18:00 Moscow time.
+Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. After the local milestone, the user authorized Vercel/Neon deployment. I1–I5 and the public I6 lead workflow are implemented and verified; I7 now includes actual hosted mobile Lighthouse measurements. Unchecked manual checks remain identified below. The user confirmed ownership of supplied photographs and excluded further AI-session packaging. Deadline: October 19, 2026, 18:00 Moscow time.
 
 ## 1. Current state and scope
 
 The responsive frontend, approved copy revisions, product/subscription selection, Belarusian phone validation, sanitized attribution, and PostgreSQL-backed endpoint are implemented. Thirty-four unit/component/route tests and thirteen isolated PostgreSQL integration tests pass. A real local browser submission was committed, its repeat was rejected, and recovery after database restart was inspected.
 
-The endpoint now returns 201 only after a committed write, 200 for a duplicate, and 503 for unavailable storage/configuration. Migrations, restricted runtime access, and local database start/stop commands exist. Hosting, hosted form verification, and deployed Lighthouse remain deferred by the user. See [database operations](database.md), [verification](verification.md), and [deferred hosting](deployment.md). The public repository already exists: [millafedotova/kvarta-coffee](https://github.com/millafedotova/kvarta-coffee).
+The endpoint returns 201 only after a committed write, 200 for a duplicate, and 503 for unavailable storage/configuration. Migrations, restricted runtime access, and local database start/stop commands exist. The [public site](https://kvarta-coffee-five.vercel.app) runs on Vercel with Neon; hosted submission, duplicate handling, and campaign persistence were verified. Mobile Lighthouse measured 95/100/100/100. See [database operations](database.md), [verification](verification.md), and [hosting](deployment.md). Source: [millafedotova/kvarta-coffee](https://github.com/millafedotova/kvarta-coffee).
 
 Keep the approved design and copy. The founders' heading uses the user's preferred informal name, Dima. Removed photo/header taglines and the phone helper must stay removed. Do not add a cart, payment, authentication, admin UI, analytics service, or notification delivery to the required work.
 
@@ -59,7 +59,7 @@ Files: `src/lib/lead-contract.ts`, `src/lib/lead-validation.ts`, `src/lib/attrib
 
 Files: new `src/lib/db.ts`, `db/migrations/001-create-leads.sql`, `scripts/migrate.mjs`, `docs/database.md`; update dependencies and scripts.
 
-- [ ] Use PostgreSQL on Neon Free and the Node.js runtime on Vercel, subject to the actual account's free-plan eligibility. Choose `pg` with `@types/pg` and `server-only`; pin installed versions through the lockfile. One small table does not require an ORM.
+- [x] Use PostgreSQL on Neon Free and Node.js 24 on Vercel Hobby. Use `pg` with `@types/pg` and `server-only`, pinned through the lockfile. Both actual account plans were inspected; no paid upgrade was selected.
 - [x] Use verified TLS settings from the provider's connection instructions. Never disable certificate verification to bypass a connection failure.
 - [x] Create the pool lazily in a server-only module, with a small per-instance maximum and bounded connection acquisition. Reuse it for warm requests; release each checked-out client in `finally`. Do not connect during static module import/build.
 - [ ] Use the pooled URL for runtime transactions. Use the direct URL for migrations and maintenance. Do not depend on session-level locks/settings across PgBouncer transactions.
@@ -139,16 +139,16 @@ Files: `vitest.integration.config.mts`, `tests/integration/`, package scripts, `
 
 Files: hosting configuration, `docs/deployment.md`, `.env.example`, asset source records.
 
-- [ ] Inspect existing Vercel/Neon access and projects before creating anything; use the current GitHub repository. Confirm free-plan eligibility/limits in the actual account and avoid paid resources.
+- [x] Inspect existing Vercel/Neon access and projects; deploy the existing repository source into the intended accounts. Confirm Hobby/Free plans and avoid paid resources. Automatic Git deployments require a GitHub login connection; the CLI release works.
 - [x] The user confirmed ownership of the supplied macro photographs and authorized their use; retain the current images and crops.
-- [ ] Create isolated development/test and production database targets with identical schema. Use a test target for previews; do not let arbitrary preview builds write to the production lead table.
-- [ ] Choose nearby hosting/database regions where supported. Set Node.js 24 compatibility and confirm actual account/runtime support.
-- [ ] Configure runtime pooled URL, explicit allowed Origin(s), and canonical `SITE_URL` in each appropriate environment. Keep migration credentials in the migration workflow, not runtime. A variable change requires a new deployment.
-- [ ] Apply the migration to the correct production database explicitly, then deploy the integration. Do not push a known broken database-dependent release to the public production branch.
-- [ ] Confirm the stable public URL opens in a signed-out browser without preview login protection. Verify HTTP, assets/fonts, server responses, metadata, and absence of local/private URLs or credentials in client output.
-- [ ] Submit a controlled synthetic lead from the hosted form and inspect the committed production record. Test a repeat and a campaign URL. No automatic production cleanup/reset; use the dedicated test database for repeated/destructive cases.
+- [x] Keep local development/test isolated from Neon production with the same committed schema. Preview/Development receive no production credentials; configure a separate target before enabling preview form writes.
+- [x] Choose Frankfurt for functions and database. Configure Node.js 24.x and verify a successful cloud build.
+- [x] Configure the Production pooled runtime URL, exact allowed Origin, and canonical `SITE_URL`. Keep owner credentials local and out of runtime/uploaded files; redeploy after configuration.
+- [x] Apply committed production migrations explicitly, then deploy the configured integration. The bootstrap without database configuration is not a working rollback target.
+- [x] Verify anonymous HTTP 200 without redirect, public metadata, 1200 × 630 social image, icon, no localhost URLs, and zero env/local-secret files in upload inputs. Lighthouse also audited the actual public page.
+- [x] Submit a controlled synthetic lead from an attributed hosted browser visit and inspect the committed production row. Repeat it and verify one unchanged row. Retain the do-not-call fixture; expose no cleanup/reset route.
 - [ ] Check a cold database/function request within the operation budget. If free-plan suspension, quota, or connectivity causes a failure, the form must preserve input and explain retry; document the observed limits.
-- [ ] Record a recovery procedure: restore the prior app deployment when needed, keep successful lead rows, and use additive migrations compatible with rollback. Do not drop/recreate the production table to fix a deployment.
+- [x] Document recovery through a known working Vercel release, preserving lead rows and using additive migrations. Never drop/recreate the production table to repair deployment.
 
 **Gate:** stable public URL, successful committed lead, real duplicate protection, stored attribution, and usable error feedback. A successful build or HTTP 200 page alone does not satisfy this gate.
 
@@ -156,10 +156,10 @@ Files: hosting configuration, `docs/deployment.md`, `.env.example`, asset source
 
 - [ ] Run build, type check, lint, unit tests, and isolated database integration tests after relevant final changes. Save results and the deployed commit identifier.
 - [ ] Check current copy/facts, removed captions, every CTA, keyboard focus, reduced motion, contrast, and 320/390/768/1440 px layouts on the release. Refresh selected screenshots; older evidence is historical.
-- [ ] Run mobile Lighthouse on the stable deployed URL, save the actual HTML/JSON report or screenshot, and record URL/date/conditions and measured scores. Performance 90 is an internal goal, not a promised result; fix material findings and remeasure only when needed.
-- [ ] Check absolute Open Graph/canonical URLs and the 1200 × 630 image. An actual messenger preview is optional; no messaging to another person is required for this check.
-- [ ] Preserve authentic AI-session export or screenshots of key moments. `docs/ai-work-log.md` is a summary and does not replace original evidence. Remove secrets/unrelated personal content from any public copy and identify such redaction honestly.
-- [ ] Keep the final README approximately half a page: live/repo links, run instructions, PostgreSQL rationale for hosted durable storage, user-versus-AI work, an actual detected AI mistake, and remaining limitations. Put longer setup/test details in linked docs.
+- [x] Run mobile Lighthouse 13.5.0 on the stable deployed URL and save HTML/JSON with actual date and simulated mobile conditions. Scores: performance 95, accessibility 100, best practices 100, SEO 100.
+- [x] Verify absolute public Open Graph/canonical URLs and the actual 1200 × 630 PNG response. No messenger communication was needed.
+- Excluded by user: further AI-session export or packaging.
+- [x] Update the concise README with live/repo links, run instructions, PostgreSQL rationale, user-versus-AI work, an actual detected AI mistake, and the GitHub auto-deployment limitation. Keep operational detail in linked documents.
 - [ ] Confirm public repository visibility, incremental commits, working links, image/font provenance, and no secrets or personal lead records in Git history.
 - [ ] Prepare one submission message with site, repository, authentic AI evidence, Lighthouse result, and README. Sending it to the assignment contact requires the user's explicit instruction.
 

@@ -1,6 +1,6 @@
 # Local database and lead persistence
 
-The local integration uses real PostgreSQL, not an in-memory or fake-success store. Public hosting was deferred by the user on October 15, 2026. This setup is for local development and synthetic verification.
+The integration uses real PostgreSQL, not an in-memory or fake-success store. The site is also deployed with Neon; see [hosting operations](deployment.md). The setup below is for local development and synthetic verification, isolated from production.
 
 ## Start and stop
 
@@ -73,4 +73,4 @@ Integration tests load the ignored local env files, require `TEST_DATABASE_URL`,
 
 Integration coverage includes independent pools, simultaneous first writes, equivalent formats, duplicate immutability, exact microsecond boundary, expiry while waiting on a lock, rollback/lock release, lock timeout, migration checksums, and attribution persisted through the real route. Browser verification used a synthetic request and confirmed one row after two sends and after a database restart.
 
-Inspect local leads through an authenticated/local PostgreSQL client using the owner role and database target from ignored configuration. There is no public read/export/reset endpoint. On hosting, the manager can use the provider's authenticated SQL console. Final hosted verification and mobile Lighthouse remain separate release work.
+Inspect local leads through an authenticated/local PostgreSQL client using the owner role and database target from ignored configuration. There is no public read/export/reset endpoint. On hosting, the manager can use Neon's authenticated SQL console. Hosted submission and duplicate behavior were verified against the actual production database; see [verification](verification.md).
