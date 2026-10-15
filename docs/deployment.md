@@ -10,7 +10,7 @@ When the user resumes hosting:
 4. Configure the runtime `DATABASE_URL`, canonical `SITE_URL`, and exact `LEAD_ALLOWED_ORIGINS` per environment. Migration credentials are not required in normal function configuration. Set Node.js 24 compatibility. Check the selected hosting runtime/region and database region.
 5. Deploy only when requested. Preview Origin values must be exact project/deployment URLs; no broad `*.vercel.app` rule. Environment changes require a new deployment.
 6. Verify a public signed-out visit, assets, metadata, one controlled committed lead, duplicate rejection, and campaign fields in the correct database. Check cold-start response time. Do not expose test cleanup or a lead list.
-7. Resolve macro-photo provenance or use approved generated/free-license replacements, then measure mobile Lighthouse on the real public URL. Save actual scores/report and current screenshots.
-8. Include authentic AI-session evidence, concise README, live/repository links, actual measurements, and remaining limits. Sending the submission is a separate user instruction.
+7. Retain the user-owned macro photographs, whose ownership is confirmed. Measure mobile Lighthouse on the real public URL and save actual scores/report and current screenshots.
+8. Include the concise README, live/repository links, actual measurements, and remaining limits. The user excluded further AI-session packaging. Sending the submission is a separate user instruction.
 
 Application rollback must preserve lead rows. Prefer additive migrations compatible with the prior release. No Telegram messaging is part of this local milestone.

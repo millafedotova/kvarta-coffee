@@ -6,8 +6,8 @@ The frontend and local PostgreSQL integration are implemented. The user explicit
 
 | Check                      | Result                                                                        |
 | -------------------------- | ----------------------------------------------------------------------------- |
-| `npm test`                 | 30 passed across 6 files                                                      |
-| `npm run test:integration` | 10 passed against actual PostgreSQL 14.20, isolated `kvarta_test`             |
+| `npm test`                 | 34 passed across 6 files                                                      |
+| `npm run test:integration` | 13 passed against actual PostgreSQL 14.20, isolated `kvarta_test`             |
 | `npm run build`            | Passed, including TypeScript; database/site/origin variables explicitly empty |
 | `npm run typecheck`        | Passed                                                                        |
 | `npm run lint`             | Passed                                                                        |
@@ -61,4 +61,12 @@ Earlier desktop/mobile/request-error screenshots document the initial frontend m
 
 ## Remaining release work
 
-Public Vercel/Neon connection and deployment, exact hosted Origin/configuration, supplied macro-photo provenance or approved replacements, actual deployed mobile Lighthouse, and authentic AI-session export/screenshots remain deferred. See [database operations](database.md), [hosting checklist](deployment.md), and [integration plan](integration-plan.md).
+Public Vercel/Neon connection and deployment, exact hosted Origin/configuration, and actual deployed mobile Lighthouse remain deferred. The user confirmed ownership of the supplied photos and excluded further AI-session packaging. See [database operations](database.md), [hosting checklist](deployment.md), and [integration plan](integration-plan.md).
+
+## Follow-up fixes from the independent review
+
+- Optional campaign strings containing zero bytes are discarded both in captured fields and sanitized URL queries. An unsupported entry year becomes null. Valid campaign fields and contact details are retained; both reproduced requests now commit successfully in PostgreSQL.
+- Editable name/comment fields reject zero bytes with field-level validation instead of causing a storage failure.
+- Checked-out database clients now have an error listener for their leased lifetime. Broken clients are discarded without attempting rollback on a dead connection; release is idempotent and transfers error handling back to the pool. No custom listener remains after release.
+- A subprocess regression test terminates only its observed test connection, verifies rejection without an uncaught exception, and confirms subsequent created/duplicate results and no listener leak. This test would exit nonzero with the reviewed implementation.
+- Repeated both original malformed-context reproductions through the rebuilt production HTTP endpoint against the disposable test database: each returned 201 and stored one row with only valid context. Repeated the HTTP connection interruption: 503 with safe structured logging, no `uncaughtException`, and the page still returned 200. The temporary review server was stopped afterward.

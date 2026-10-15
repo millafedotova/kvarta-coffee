@@ -1,10 +1,10 @@
 # Kvarta Coffee — Remaining Integration Plan
 
-Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. The user subsequently requested local integration only. Local I1–I5 work is implemented and verified; hosted I6–I7 work is deferred. Unchecked items remain release work. Deadline: October 19, 2026, 18:00 Moscow time.
+Reviewed on October 15, 2026 against the live [assignment](https://tz.vitai.world/) and the current source. The user subsequently requested local integration only, confirmed ownership of the supplied photographs, and excluded further AI-session packaging. Local I1–I5 work is implemented and verified; hosted I6–I7 work is deferred. Unchecked items remain release work. Deadline: October 19, 2026, 18:00 Moscow time.
 
 ## 1. Current state and scope
 
-The responsive frontend, approved copy revisions, product/subscription selection, Belarusian phone validation, sanitized attribution, and PostgreSQL-backed endpoint are implemented. Thirty unit/component/route tests and ten isolated PostgreSQL integration tests pass. A real local browser submission was committed, its repeat was rejected, and recovery after database restart was inspected.
+The responsive frontend, approved copy revisions, product/subscription selection, Belarusian phone validation, sanitized attribution, and PostgreSQL-backed endpoint are implemented. Thirty-four unit/component/route tests and thirteen isolated PostgreSQL integration tests pass. A real local browser submission was committed, its repeat was rejected, and recovery after database restart was inspected.
 
 The endpoint now returns 201 only after a committed write, 200 for a duplicate, and 503 for unavailable storage/configuration. Migrations, restricted runtime access, and local database start/stop commands exist. Hosting, hosted form verification, and deployed Lighthouse remain deferred by the user. See [database operations](database.md), [verification](verification.md), and [deferred hosting](deployment.md). The public repository already exists: [millafedotova/kvarta-coffee](https://github.com/millafedotova/kvarta-coffee).
 
@@ -140,7 +140,7 @@ Files: `vitest.integration.config.mts`, `tests/integration/`, package scripts, `
 Files: hosting configuration, `docs/deployment.md`, `.env.example`, asset source records.
 
 - [ ] Inspect existing Vercel/Neon access and projects before creating anything; use the current GitHub repository. Confirm free-plan eligibility/limits in the actual account and avoid paid resources.
-- [ ] Resolve the supplied macro-photo source/license records or replace those images with approved generated/free-license alternatives before release. Preserve selected crops and document replacement prompts/sources.
+- [x] The user confirmed ownership of the supplied macro photographs and authorized their use; retain the current images and crops.
 - [ ] Create isolated development/test and production database targets with identical schema. Use a test target for previews; do not let arbitrary preview builds write to the production lead table.
 - [ ] Choose nearby hosting/database regions where supported. Set Node.js 24 compatibility and confirm actual account/runtime support.
 - [ ] Configure runtime pooled URL, explicit allowed Origin(s), and canonical `SITE_URL` in each appropriate environment. Keep migration credentials in the migration workflow, not runtime. A variable change requires a new deployment.
@@ -179,7 +179,7 @@ Use these boundaries only when the corresponding work is complete. Only the loca
 
 - Authenticated access to the intended Vercel and Neon projects, or creation in the user's accounts if absent. Account terms/sign-up steps may require user interaction.
 - Database connection settings stored through local ignored configuration and hosting secrets; never requested as a public message or committed file.
-- Provenance of the user-supplied macro photographs, or approval of suitable replacements.
+- Supplied macro-photograph ownership was confirmed by the user on October 15; no replacement is needed.
 - A genuine session export or screenshots for the final evidence package. The current work log cannot manufacture this.
 - Optional Telegram bot/chat destination and explicit sending authorization only if the user selects that enhancement.
 
