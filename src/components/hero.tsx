@@ -52,9 +52,6 @@ export function Hero() {
               за один раз.
             </span>
           </div>
-          <span className={styles.photoSide}>
-            НЕБОЛЬШАЯ МАСТЕРСКАЯ. СВЕЖИЙ КОФЕ.
-          </span>
         </div>
       </Container>
     </section>
