@@ -19,7 +19,6 @@ export function SiteHeader() {
             КВАРТА<span className={styles.wordmarkDot}>✳</span>
           </a>
           <div className={styles.baseline}>
-            <span>Обжариваем сами. Привозим по Минску.</span>
             <span className={styles.smallNote}>ЗЕРНО · ДРИПЫ · ПОДПИСКА</span>
           </div>
         </Container>
