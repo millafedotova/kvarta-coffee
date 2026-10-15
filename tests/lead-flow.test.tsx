@@ -23,6 +23,34 @@ function renderFlow() {
   );
 }
 
+it.each(["+375 29 123-45-67", "+375 29 123 45 67", "375291234567"])(
+  "submits the form with %s without requiring a specific phone format",
+  async (phone) => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json({ status: "created" }, { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+    renderFlow();
+    await user.type(
+      screen.getByLabelText(/Как вас зовут/),
+      "Phone format check",
+    );
+    fireEvent.change(screen.getByLabelText(/Телефон/), {
+      target: { value: phone },
+    });
+    await user.click(screen.getByLabelText("Есть вопрос"));
+    await user.click(screen.getByRole("button", { name: /Оставить заявку/ }));
+    await screen.findByText(/Заявка получена/);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/lead",
+      expect.objectContaining({
+        body: expect.stringContaining('"phone":"+375291234567"'),
+      }),
+    );
+  },
+);
+
 it("preserves an edited comment and contacts while switching product to subscription", async () => {
   const user = userEvent.setup();
   renderFlow();

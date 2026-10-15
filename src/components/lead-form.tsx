@@ -103,7 +103,7 @@ export function LeadForm() {
                 required
                 maxLength={64}
                 value={flow.draft.phone}
-                placeholder="+375 29 123-45-67"
+                placeholder="Например, +375291234567"
                 onChange={(event) => flow.edit("phone", event.target.value)}
                 onBlur={() => flow.validateField("phone")}
                 aria-invalid={Boolean(flow.errors.phone)}

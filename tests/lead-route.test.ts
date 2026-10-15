@@ -35,6 +35,24 @@ function validRequest() {
   });
 }
 
+it.each(["+375 29 123-45-67", "+375 29 123 45 67", "375291234567"])(
+  "accepts %s at the API boundary and stores its canonical number",
+  async (phone) => {
+    storage.save.mockResolvedValueOnce("created");
+    const response = await POST(
+      new Request("http://localhost:3000/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...input, phone }),
+      }),
+    );
+    expect(response.status).toBe(201);
+    expect(storage.save).toHaveBeenCalledWith(
+      expect.objectContaining({ phone: "+375291234567" }),
+    );
+  },
+);
+
 it("maps committed and duplicate results to the exact acknowledgement contract", async () => {
   storage.save
     .mockResolvedValueOnce("created")

@@ -22,7 +22,7 @@ Open the printed local URL. Stop the database with `npm run db:local:stop`; data
 
 The form validates Belarusian numbers, persists contact/interest/product and sanitized campaign context, and acknowledges only committed writes. Transactional phone locks prevent concurrent duplicates for exactly ten minutes; repeats preserve the original record. PostgreSQL was chosen for durable storage across future hosted function instances, where local files are unsuitable.
 
-`npm test` runs 34 unit/component/route tests; `npm run test:integration` runs 13 tests on a separate disposable PostgreSQL database. Build, TypeScript, lint, and formatting checks are provided. Actual results and browser evidence are in [verification](docs/verification.md).
+`npm test` runs 57 unit/component/route tests; `npm run test:integration` runs 13 tests on a separate disposable PostgreSQL database. Build, TypeScript, lint, and formatting checks are provided. Actual results and browser evidence are in [verification](docs/verification.md).
 
 ## Process and remaining work
 

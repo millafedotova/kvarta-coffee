@@ -11,9 +11,29 @@ const draft = {
 };
 
 describe("Belarusian phone validation", () => {
-  it("normalizes punctuation into one canonical number", () => {
-    expect(normalizeBelarusPhone("+375 (29) 123-45-67")).toBe("+375291234567");
-    expect(normalizeBelarusPhone("+375291234567")).toBe("+375291234567");
+  it.each([
+    "+375 (29) 123-45-67",
+    "+375 29 123 45 67",
+    "+375.29.123.45.67",
+    "+375291234567",
+    "375291234567",
+    "291234567",
+    "29 123 45 67",
+    "8 (029) 123-45-67",
+    "80291234567",
+    "+375\u00a029\u00a0123\u00a045\u00a067",
+    "+375\u202f29\u202f123\u202f45\u202f67",
+    "+375 29 123–45–67",
+    "+375 29 123—45—67",
+    "+375 29 123‑45‑67",
+    "+375\u200b29\u200b1234567",
+    "375\u2060291234567",
+    "+375\u200e29 1234567",
+  ])("normalizes the same phone written as %s", (number) => {
+    expect(normalizeBelarusPhone(number)).toBe("+375291234567");
+    expect(draftSchema.parse({ ...draft, phone: number }).phone).toBe(
+      "+375291234567",
+    );
   });
   it("rejects the wrong country, incomplete input, and surrounding prose", () => {
     for (const number of [
@@ -21,6 +41,8 @@ describe("Belarusian phone validation", () => {
       "+375 29 12",
       "call +375291234567",
       "+375001234567",
+      "+375291234567 ext 123",
+      "++375291234567",
     ])
       expect(normalizeBelarusPhone(number)).toBeNull();
   });
@@ -30,6 +52,15 @@ describe("Belarusian phone validation", () => {
 });
 
 describe("lead draft contract", () => {
+  it("asks for a missing number without implying a required punctuation format", () => {
+    const result = draftSchema.safeParse({ ...draft, phone: " " });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error.issues[0]).toMatchObject({
+        path: ["phone"],
+        message: "Введите номер телефона.",
+      });
+  });
   it("rejects zero bytes in editable contact fields with field errors", () => {
     for (const field of ["name", "comment"] as const) {
       const result = draftSchema.safeParse({

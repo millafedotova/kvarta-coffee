@@ -9,7 +9,12 @@ import {
 } from "./lead-contract";
 
 export function normalizeBelarusPhone(value: string): string | null {
-  const phone = parsePhoneNumberFromString(value.trim(), {
+  const compact = value.replace(
+    /[\s().\p{Dash_Punctuation}\u2212\u200B-\u200F\u2060\uFEFF]/gu,
+    "",
+  );
+  if (!/^\+?\d+$/.test(compact)) return null;
+  const phone = parsePhoneNumberFromString(compact, {
     defaultCountry: "BY",
     extract: false,
   });
@@ -18,13 +23,15 @@ export function normalizeBelarusPhone(value: string): string | null {
 
 const phoneSchema = z
   .string()
+  .trim()
+  .min(1, "Введите номер телефона.")
   .max(64, "Проверьте номер телефона.")
   .transform((value, context) => {
     const phone = normalizeBelarusPhone(value);
     if (!phone) {
       context.addIssue({
         code: "custom",
-        message: "Введите белорусский номер, например +375 29 123-45-67.",
+        message: "Введите белорусский номер: +375291234567 или 291234567.",
       });
       return z.NEVER;
     }

@@ -6,9 +6,9 @@ The frontend, local PostgreSQL integration, and Vercel/Neon production deploymen
 
 | Check                      | Result                                                                        |
 | -------------------------- | ----------------------------------------------------------------------------- |
-| `npm test`                 | 34 passed across 6 files                                                      |
+| `npm test`                 | 57 passed across 6 files                                                      |
 | `npm run test:integration` | 13 passed against actual PostgreSQL 14.20, isolated `kvarta_test`             |
-| `npm run build`            | Passed, including TypeScript; database/site/origin variables explicitly empty |
+| `npm run build`            | Passed, including TypeScript                                                  |
 | `npm run typecheck`        | Passed                                                                        |
 | `npm run lint`             | Passed                                                                        |
 | `npm run format:check`     | Passed                                                                        |
@@ -92,6 +92,14 @@ FCP: 1.5 s; LCP: 2.8 s; total blocking time: 10 ms; CLS: 0.003; speed index: 1.6
 Actual reports: [HTML](lighthouse/mobile-2026-10-15.html), [JSON](lighthouse/mobile-2026-10-15.json). Reports were checked for the configured connection strings/passwords before inclusion; none were present. Cold suspension was not deliberately forced, so no forced-cold-start measurement is claimed.
 
 ## Follow-up fixes from the independent review
+
+### Phone input follow-up
+
+Ordinary spaces, hyphens, and compact numbers were already parsed by the phone library. Explicit normalization now also removes invisible paste-formatting characters and normalizes supported spacing, parentheses, periods, and Unicode dashes before checking the actual Belarusian numbering plan. Browser and server use the same schema and store E.164 numbers. Prose, extensions, extra plus signs, invalid lengths, and foreign numbers remain invalid.
+
+Regression fixtures cover 17 equivalent spellings, including national numbers, country code without a plus, domestic prefixes, nonbreaking spaces, Unicode dashes, and invisible pasted marks. Component and route tests exercise hyphenated, spaced, and digits-only input through submission and verify the canonical payload. Empty input has its own required-field message; the placeholder explicitly labels its value as an example. After this change, 57 unit/component/route tests and 13 isolated PostgreSQL tests passed, as did build/TypeScript, lint, and formatting.
+
+### Earlier persistence and campaign fixes
 
 - Optional campaign strings containing zero bytes are discarded both in captured fields and sanitized URL queries. An unsupported entry year becomes null. Valid campaign fields and contact details are retained; both reproduced requests now commit successfully in PostgreSQL.
 - Editable name/comment fields reject zero bytes with field-level validation instead of causing a storage failure.
