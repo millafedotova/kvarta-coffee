@@ -1,44 +1,57 @@
+import { randomUUID } from "node:crypto";
 import { leadSchema, getFieldErrors } from "@/lib/lead-validation";
+import { allowedOrigins, ConfigurationError } from "@/lib/env";
+import { getPool } from "@/lib/db";
+import { createLeadRepository } from "@/lib/lead-repository";
+
+export const runtime = "nodejs";
+
+const headers = { "Cache-Control": "no-store" };
+function invalid() {
+  return Response.json(
+    { status: "invalid", errors: {} },
+    { status: 400, headers },
+  );
+}
+function unavailable(requestId: string, error: unknown) {
+  console.error(
+    JSON.stringify({
+      event: "lead_unavailable",
+      requestId,
+      category:
+        error instanceof ConfigurationError ? "configuration" : "persistence",
+    }),
+  );
+  return Response.json({ status: "unavailable" }, { status: 503, headers });
+}
 
 export async function POST(request: Request) {
-  const headers = { "Cache-Control": "no-store" };
-  const origin = request.headers.get("origin");
-  if (origin) {
-    try {
-      const originUrl = new URL(origin);
-      const host = request.headers.get("host") ?? new URL(request.url).host;
-      const configuredOrigin = process.env.SITE_URL
-        ? new URL(process.env.SITE_URL).origin
-        : null;
-      const allowed = configuredOrigin
-        ? originUrl.origin === configuredOrigin
-        : originUrl.host === host;
-      if (!["http:", "https:"].includes(originUrl.protocol) || !allowed)
-        return Response.json(
-          { status: "invalid", errors: {} },
-          { status: 400, headers },
-        );
-    } catch {
-      return Response.json(
-        { status: "invalid", errors: {} },
-        { status: 400, headers },
-      );
-    }
-  }
-  if (!request.headers.get("content-type")?.includes("application/json"))
-    return Response.json(
-      { status: "invalid", errors: {} },
-      { status: 400, headers },
-    );
-  const reader = request.body?.getReader();
-  if (!reader)
-    return Response.json(
-      { status: "invalid", errors: {} },
-      { status: 400, headers },
-    );
-  let size = 0;
-  const chunks: Uint8Array[] = [];
+  const requestId = randomUUID();
+  let origins: Set<string>;
   try {
+    origins = allowedOrigins();
+  } catch (error) {
+    return unavailable(requestId, error);
+  }
+  const origin = request.headers.get("origin");
+  if (origin && !origins.has(origin)) return invalid();
+  const mediaType = request.headers
+    .get("content-type")
+    ?.split(";")[0]
+    .trim()
+    .toLowerCase();
+  if (mediaType !== "application/json") return invalid();
+  const reader = request.body?.getReader();
+  if (!reader) return invalid();
+  let input: unknown;
+  let bodyExpired = false;
+  const bodyDeadline = setTimeout(() => {
+    bodyExpired = true;
+    void reader.cancel().catch(() => {});
+  }, 5000);
+  try {
+    let size = 0;
+    const chunks: Uint8Array[] = [];
     while (true) {
       const chunk = await reader.read();
       if (chunk.done) break;
@@ -49,27 +62,34 @@ export async function POST(request: Request) {
       }
       chunks.push(chunk.value);
     }
+    if (bodyExpired) return invalid();
     const bytes = new Uint8Array(size);
     let offset = 0;
     for (const chunk of chunks) {
       bytes.set(chunk, offset);
       offset += chunk.byteLength;
     }
-    const input: unknown = JSON.parse(new TextDecoder().decode(bytes));
-    const parsed = leadSchema.safeParse(input);
-    if (!parsed.success)
-      return Response.json(
-        { status: "invalid", errors: getFieldErrors(parsed.error) },
-        { status: 400, headers },
-      );
-    // Persistence is the next backend milestone. Never acknowledge an unsaved lead.
-    return Response.json({ status: "unavailable" }, { status: 503, headers });
+    input = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch {
+    return invalid();
+  } finally {
+    clearTimeout(bodyDeadline);
+    reader.releaseLock();
+  }
+
+  const parsed = leadSchema.safeParse(input);
+  if (!parsed.success)
     return Response.json(
-      { status: "invalid", errors: {} },
+      { status: "invalid", errors: getFieldErrors(parsed.error) },
       { status: 400, headers },
     );
-  } finally {
-    reader.releaseLock();
+  try {
+    const status = await createLeadRepository(getPool())(parsed.data);
+    return Response.json(
+      { status },
+      { status: status === "created" ? 201 : 200, headers },
+    );
+  } catch (error) {
+    return unavailable(requestId, error);
   }
 }

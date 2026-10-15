@@ -46,10 +46,24 @@ export function LeadFlow({ children }: { children: ReactNode }) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const inFlight = useRef(false);
   const attribution = useRef<Attribution | null>(null);
+  const rejectedField = useRef<string | null>(null);
 
   useEffect(() => {
     attribution.current = captureAttribution();
   }, []);
+
+  useEffect(() => {
+    // Wait until the response render re-enables the form controls.
+    if (state.type !== "submitting" && rejectedField.current) {
+      const field = rejectedField.current;
+      rejectedField.current = null;
+      document
+        .getElementById(
+          field === "interest" ? "interest-subscription" : `lead-${field}`,
+        )
+        ?.focus();
+    }
+  }, [state]);
 
   function choose(value: Selection, navigate = false) {
     if (inFlight.current) return;
@@ -118,13 +132,17 @@ export function LeadFlow({ children }: { children: ReactNode }) {
         case "duplicate":
           setState({ type: "duplicate" });
           break;
-        case "invalid":
+        case "invalid": {
           setErrors(result.errors);
+          rejectedField.current = Object.keys(result.errors)[0] ?? null;
           setState({
             type: "error",
-            message: "Проверьте отмеченные поля и попробуйте ещё раз.",
+            message: Object.keys(result.errors).length
+              ? "Проверьте отмеченные поля и попробуйте ещё раз."
+              : "Не удалось отправить заявку. Обновите страницу и попробуйте ещё раз.",
           });
           break;
+        }
         case "too_large":
           setState({
             type: "error",

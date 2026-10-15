@@ -1,7 +1,38 @@
 import { describe, expect, it, vi } from "vitest";
 import { captureAttribution, sanitizePageUrl } from "../src/lib/attribution";
+import { leadSchema } from "../src/lib/lead-validation";
 
 describe("campaign attribution", () => {
+  it("sanitizes tampered stored context and discards unrelated keys", () => {
+    sessionStorage.setItem(
+      "kvarta.attribution.v1",
+      JSON.stringify({
+        version: 1,
+        enteredAt: "2026-10-15T08:00:00.000Z",
+        landingUrl:
+          "https://user:secret@example.com/?token=private&utm_source=ads#request",
+        referrer: "javascript:alert(1)",
+        campaign: { utm_source: "ads", secret: "discard" },
+      }),
+    );
+    const result = captureAttribution();
+    expect(result.landingUrl).toBe("https://example.com/?utm_source=ads");
+    expect(result.referrer).toBe("");
+    expect(result.campaign).toEqual({ utm_source: "ads" });
+  });
+  it("does not reject a valid lead for missing or malformed optional context", () => {
+    const result = leadSchema.parse({
+      name: "Test",
+      phone: "+375291234567",
+      interest: "question",
+      productId: null,
+      attribution: { invalid: true },
+      submissionUrl: "data:secret",
+    });
+    expect(result.comment).toBe("");
+    expect(result.attribution).toBeNull();
+    expect(result.submissionUrl).toBe("");
+  });
   it("keeps allowlisted campaign values and removes unrelated query data", () => {
     expect(
       sanitizePageUrl(

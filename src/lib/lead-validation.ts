@@ -1,5 +1,6 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { z } from "zod";
+import { pageUrlSchema } from "./page-context";
 import {
   attributionSchema,
   interests,
@@ -43,7 +44,8 @@ export const draftSchema = z
     comment: z
       .string()
       .trim()
-      .max(1000, "Сократите комментарий до 1000 символов."),
+      .max(1000, "Сократите комментарий до 1000 символов.")
+      .default(""),
   })
   .superRefine((value, context) => {
     if (value.interest !== "one_time" && value.productId !== null) {
@@ -56,8 +58,8 @@ export const draftSchema = z
   });
 
 export const leadSchema = draftSchema.safeExtend({
-  attribution: attributionSchema.nullable(),
-  submissionUrl: z.string().max(2048),
+  attribution: attributionSchema.nullable().catch(null),
+  submissionUrl: pageUrlSchema,
 });
 export type LeadInput = z.infer<typeof leadSchema>;
 

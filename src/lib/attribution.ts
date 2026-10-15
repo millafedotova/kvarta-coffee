@@ -1,33 +1,9 @@
 import { attributionSchema, type Attribution } from "./lead-contract";
 
-const campaignKeys = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-] as const;
-const storageKey = "kvarta.attribution.v1";
+import { campaignKeys, sanitizePageUrl } from "./page-context";
+export { sanitizePageUrl } from "./page-context";
 
-export function sanitizePageUrl(value: string): string {
-  try {
-    const url = new URL(value);
-    if (!["http:", "https:"].includes(url.protocol)) return "";
-    url.username = "";
-    url.password = "";
-    url.hash = "";
-    const parameters = new URLSearchParams();
-    for (const key of campaignKeys) {
-      const entry = url.searchParams.get(key);
-      if (entry) parameters.set(key, entry.slice(0, 256));
-    }
-    url.search = parameters.toString();
-    const result = url.toString();
-    return result.length <= 2048 ? result : "";
-  } catch {
-    return "";
-  }
-}
+const storageKey = "kvarta.attribution.v1";
 
 export function captureAttribution(): Attribution {
   try {

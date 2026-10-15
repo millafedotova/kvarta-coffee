@@ -89,3 +89,28 @@ it("sends one immutable request while duplicate submit events are pending", asyn
     expect(screen.getByText(/Ваша заявка уже получена/)).toBeTruthy(),
   );
 });
+
+it("focuses a server-rejected field and preserves entered values", async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        Response.json(
+          { status: "invalid", errors: { phone: "Проверьте номер телефона." } },
+          { status: 400 },
+        ),
+      ),
+  );
+  renderFlow();
+  await user.type(screen.getByLabelText(/Как вас зовут/), "Test");
+  await user.type(screen.getByLabelText(/Телефон/), "+375291234567");
+  await user.click(screen.getByLabelText("Есть вопрос"));
+  await user.click(screen.getByRole("button", { name: /Оставить заявку/ }));
+  await screen.findByText("Проверьте номер телефона.");
+  expect(document.activeElement).toBe(screen.getByLabelText(/Телефон/));
+  expect(
+    (screen.getByLabelText(/Как вас зовут/) as HTMLInputElement).value,
+  ).toBe("Test");
+});

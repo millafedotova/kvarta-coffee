@@ -12,6 +12,7 @@ test-results/
 .env.*
 !.env.example
 .vercel/
+.local/
 
 # Local lead data and databases
 *.db

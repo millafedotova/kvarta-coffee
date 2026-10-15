@@ -9,22 +9,29 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "format": "prettier --write src tests vitest.config.mts next.config.ts",
-    "format:check": "prettier --check src tests vitest.config.mts next.config.ts"
+    "format": "prettier --write src tests scripts vitest.config.mts vitest.integration.config.mts next.config.ts",
+    "format:check": "prettier --check src tests scripts vitest.config.mts vitest.integration.config.mts next.config.ts",
+    "db:migrate": "node scripts/migrate.mjs",
+    "test:integration": "node --env-file-if-exists=.env.local --env-file-if-exists=.env.test.local node_modules/vitest/vitest.mjs run --config vitest.integration.config.mts",
+    "db:local:start": "node scripts/local-database.mjs start",
+    "db:local:stop": "node scripts/local-database.mjs stop"
   },
   "dependencies": {
     "@fontsource-variable/geologica": "^5.3.0",
     "@fontsource-variable/golos-text": "^5.3.0",
     "libphonenumber-js": "^1.13.15",
     "next": "16.4.1",
+    "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
