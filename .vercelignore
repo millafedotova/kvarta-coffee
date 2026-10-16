@@ -12,3 +12,6 @@ playwright-report/
 test-results/
 *.log
 *.tsbuildinfo
+
+# Local agent instructions
+AGENTS.md

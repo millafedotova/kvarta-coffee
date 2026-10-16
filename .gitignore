@@ -33,3 +33,6 @@ private-assets/
 private-session-exports/
 
 *.tsbuildinfo
+
+# Local agent instructions
+AGENTS.md
