@@ -43,7 +43,7 @@ export function RoasteryGallery({ copy }: { copy: Dictionary["gallery"] }) {
   }
 
   return (
-    <figure
+    <div
       className={styles.gallery}
       role="region"
       aria-roledescription={copy.carousel}
@@ -103,13 +103,9 @@ export function RoasteryGallery({ copy }: { copy: Dictionary["gallery"] }) {
           </div>
         ))}
       </div>
-      <figcaption
-        className={styles.caption}
-        aria-live="polite"
-        aria-atomic="true"
-      >
+      <p className={styles.caption} aria-live="polite" aria-atomic="true">
         {copy.photos[active].caption}
-      </figcaption>
+      </p>
       <div className={styles.controls}>
         <span className={styles.counter} aria-live="off" aria-hidden="true">
           {String(active + 1).padStart(2, "0")}
@@ -162,6 +158,6 @@ export function RoasteryGallery({ copy }: { copy: Dictionary["gallery"] }) {
           </button>
         </div>
       </div>
-    </figure>
+    </div>
   );
 }
