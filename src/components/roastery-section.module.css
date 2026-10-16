@@ -4,89 +4,26 @@
   gap: 64px;
   align-items: center;
 }
-.figure {
-  margin: 0;
+.story h2 {
+  margin-top: 16px;
 }
-.photo {
-  position: relative;
-  aspect-ratio: 1.15;
-  overflow: hidden;
-  border-radius: 12px;
-  background: var(--sage-light);
-}
-.image {
-  object-fit: cover;
-  object-position: 36% center;
-}
-.figure figcaption {
-  font-size: 12px;
-  margin-top: 12px;
+.story > :global(.eyebrow) {
   color: var(--muted);
-}
-.year {
-  display: inline-block;
-  padding: 7px 14px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 11px;
-  color: var(--forest);
-  letter-spacing: 0.1em;
-}
-.story h3 {
-  font-size: 36px;
-  line-height: 1.15;
-  margin-top: 24px;
 }
 .story p {
   color: var(--muted);
   max-width: 430px;
   margin-top: 24px;
 }
-.fact {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding-top: 28px;
-  margin-top: 28px;
-  border-top: 1px solid var(--border);
-}
-.fact strong {
-  font-family: var(--display);
-  font-size: 42px;
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: -0.055em;
-  white-space: nowrap;
-  color: var(--forest);
-}
-.fact span {
-  color: var(--muted);
-  font-size: 12px;
-}
 @media (max-width: 1023px) {
   .grid {
     gap: 32px;
-  }
-  .story h3 {
-    font-size: 30px;
-  }
-  .fact {
-    gap: 16px;
-  }
-  .fact strong {
-    font-size: 32px;
   }
 }
 @media (max-width: 767px) {
   .grid {
     grid-template-columns: 1fr;
     gap: 32px;
-  }
-  .photo {
-    aspect-ratio: 1.25;
-  }
-  .story h3 {
-    font-size: 32px;
   }
   .story p {
     margin-top: 20px;

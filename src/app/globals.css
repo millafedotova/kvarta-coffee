@@ -135,6 +135,16 @@ fieldset {
   white-space: nowrap;
   border: 0;
 }
+.recoveryCopy {
+  margin-block: 24px;
+}
+.recoveryAction {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-end: 24px;
+  color: var(--forest);
+}
 @media (max-width: 639px) {
   .sectionSpace {
     padding-block: 60px;

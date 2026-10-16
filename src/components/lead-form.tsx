@@ -1,28 +1,68 @@
 "use client";
 
-import { getProduct } from "@/content/coffee";
+import { useCallback, useEffect, useRef } from "react";
+import { site } from "@/content/site";
+import { formatMessage, formatPrice } from "@/i18n/format";
+import type { LocalizedCoffee } from "@/i18n/products";
+import type { Dictionary } from "@/i18n/types";
+import { readVisibleDraft } from "@/lib/lead-draft-handoff";
+import { interests } from "@/lib/lead-contract";
 import { useLeadFlow } from "./lead-flow";
 import { Container } from "./container";
 import actions from "./action.module.css";
 import styles from "./lead-form.module.css";
 
-const interestOptions = [
-  { value: "subscription", label: "Подписка" },
-  { value: "one_time", label: "Разовый заказ" },
-  { value: "question", label: "Есть вопрос" },
-] as const;
-
-export function LeadForm() {
+export function LeadForm({
+  copy,
+  products,
+}: {
+  copy: Dictionary["form"];
+  products: Pick<
+    LocalizedCoffee,
+    "id" | "name" | "size" | "price" | "accent"
+  >[];
+}) {
   const flow = useLeadFlow();
+  const form = useRef<HTMLFormElement>(null);
+  const interestOptions = interests.map((value) => ({
+    value,
+    label: copy.interests[value],
+  }));
+  const syncDraft = flow.syncDraft;
+  const syncVisibleDraft = useCallback(
+    (element: HTMLFormElement) => {
+      syncDraft(readVisibleDraft(element));
+    },
+    [syncDraft],
+  );
+
+  useEffect(() => {
+    const element = form.current;
+    function synchronize() {
+      if (element) syncVisibleDraft(element);
+    }
+    const frame = requestAnimationFrame(synchronize);
+    window.addEventListener("pageshow", synchronize);
+    element?.addEventListener("animationstart", synchronize);
+    element?.addEventListener("webkitAnimationStart", synchronize);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pageshow", synchronize);
+      element?.removeEventListener("animationstart", synchronize);
+      element?.removeEventListener("webkitAnimationStart", synchronize);
+    };
+  }, [syncVisibleDraft, flow.draftVersion]);
   const pending = flow.state.type === "submitting";
-  const selectedProduct = getProduct(flow.selection.productId);
+  const selectedProductIds =
+    flow.selection.productIds ??
+    (flow.selection.productId ? [flow.selection.productId] : []);
   const message =
     flow.state.type === "success"
-      ? "Заявка получена. Перезвоним и согласуем детали вашего заказа."
+      ? copy.success
       : flow.state.type === "duplicate"
-        ? "Ваша заявка уже получена. Повторно отправлять её не нужно — мы свяжемся с вами."
+        ? copy.duplicate
         : flow.state.type === "error"
-          ? flow.state.message
+          ? flow.message
           : "";
 
   return (
@@ -33,42 +73,42 @@ export function LeadForm() {
     >
       <Container className={styles.grid}>
         <div className={styles.copy}>
-          <span className="eyebrow">05 / ЗАЯВКА</span>
           <h2 id="request-heading" tabIndex={-1}>
-            Заказать кофе
-            <br />
-            или задать вопрос.
+            {copy.title.join(" ")}
           </h2>
-          <p>
-            Оставьте номер — позвоним, поможем выбрать кофе и договоримся о
-            доставке.
-          </p>
+          <p>{copy.description}</p>
           <div className={styles.note}>
             <span className={styles.star} aria-hidden="true">
               ✳
             </span>
             <span>
-              Не знаете, какой кофе взять?
+              {copy.advice[0]}
               <br />
-              Расскажите, как обычно его готовите.
+              {copy.advice[1]}
             </span>
           </div>
         </div>
         <form
+          key={flow.draftVersion}
+          id="lead-form"
+          ref={form}
           method="post"
           action="/api/lead"
           noValidate
           className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
-            void flow.submit();
+            void flow.submit(readVisibleDraft(event.currentTarget));
           }}
+          onInputCapture={(event) => syncVisibleDraft(event.currentTarget)}
+          onChangeCapture={(event) => syncVisibleDraft(event.currentTarget)}
+          onFocusCapture={(event) => syncVisibleDraft(event.currentTarget)}
           aria-busy={pending}
         >
           <fieldset disabled={pending} className={styles.fields}>
             <div className={styles.field}>
               <label htmlFor="lead-name">
-                Как вас зовут <span>*</span>
+                {copy.name} <span>*</span>
               </label>
               <input
                 id="lead-name"
@@ -76,10 +116,12 @@ export function LeadForm() {
                 autoComplete="name"
                 required
                 maxLength={100}
-                value={flow.draft.name}
-                placeholder="Ваше имя"
+                defaultValue={flow.draft.name}
+                placeholder={copy.namePlaceholder}
                 onChange={(event) => flow.edit("name", event.target.value)}
-                onBlur={() => flow.validateField("name")}
+                onBlur={(event) =>
+                  flow.validateField("name", event.currentTarget.value)
+                }
                 aria-invalid={Boolean(flow.errors.name)}
                 aria-describedby={flow.errors.name ? "error-name" : undefined}
               />
@@ -91,7 +133,7 @@ export function LeadForm() {
             </div>
             <div className={styles.field}>
               <label htmlFor="lead-phone">
-                Телефон <span>*</span>
+                {copy.phone} <span>*</span>
               </label>
               <input
                 id="lead-phone"
@@ -102,15 +144,17 @@ export function LeadForm() {
                 dir="ltr"
                 required
                 maxLength={64}
-                value={flow.draft.phone}
-                placeholder="Например, +375291234567"
+                defaultValue={flow.draft.phone}
+                placeholder="+375 XX XXX-XX-XX"
                 onChange={(event) => flow.edit("phone", event.target.value)}
-                onBlur={() => flow.validateField("phone")}
+                onBlur={(event) =>
+                  flow.validateField("phone", event.currentTarget.value)
+                }
                 aria-invalid={Boolean(flow.errors.phone)}
                 aria-describedby={flow.errors.phone ? "error-phone" : undefined}
               />
               {flow.errors.phone ? (
-                <p id="error-phone" className={styles.error}>
+                <p id="error-phone" className={styles.error} role="alert">
                   {flow.errors.phone}
                 </p>
               ) : null}
@@ -122,7 +166,7 @@ export function LeadForm() {
               }
             >
               <legend>
-                Что вас интересует <span>*</span>
+                {copy.interest} <span>*</span>
               </legend>
               <div className={styles.options}>
                 {interestOptions.map((option) => (
@@ -140,6 +184,7 @@ export function LeadForm() {
                             ? {
                                 interest: "one_time",
                                 productId: flow.selection.productId,
+                                productIds: selectedProductIds,
                               }
                             : { interest: option.value, productId: null },
                         )
@@ -155,47 +200,195 @@ export function LeadForm() {
                 </p>
               ) : null}
             </fieldset>
-            {selectedProduct ? (
-              <div className={styles.selection}>
-                <div>
-                  <span className="eyebrow">ВЫ ВЫБРАЛИ</span>
-                  <strong>{selectedProduct.name}</strong>
-                  <span>
-                    {selectedProduct.size} · {selectedProduct.price} BYN
-                  </span>
+            {flow.selection.interest === "one_time" ? (
+              <fieldset
+                className={styles.products}
+                id="lead-products"
+                tabIndex={-1}
+                aria-describedby={
+                  flow.errors.productId ||
+                  flow.errors.productIds ||
+                  flow.errors.productQuantities
+                    ? "error-product"
+                    : undefined
+                }
+              >
+                <legend>
+                  {copy.product} <span>{copy.multiple}</span>
+                </legend>
+                <div className={styles.productGrid}>
+                  {products.map((product) => (
+                    <div className={styles.productItem} key={product.id}>
+                      <label className={styles.productChoice}>
+                        <input
+                          type="checkbox"
+                          name="productIds"
+                          value={product.id}
+                          checked={selectedProductIds.includes(product.id)}
+                          onChange={(event) => {
+                            const nextProducts = event.currentTarget.checked
+                              ? [...selectedProductIds, product.id]
+                              : selectedProductIds.filter(
+                                  (id) => id !== product.id,
+                                );
+                            flow.choose({
+                              interest: "one_time",
+                              productId: nextProducts[0] ?? null,
+                              productIds: nextProducts,
+                            });
+                          }}
+                        />
+                        <span
+                          className={`${styles.productColor} ${styles[product.accent]}`}
+                          aria-hidden="true"
+                        />
+                        <span className={styles.productInfo}>
+                          <span>{product.name}</span>
+                          <span>
+                            {product.size} ·{" "}
+                            {formatPrice(product.price, flow.locale)}
+                          </span>
+                        </span>
+                        <span
+                          className={styles.productCheck}
+                          aria-hidden="true"
+                        >
+                          ✓
+                        </span>
+                      </label>
+                      {selectedProductIds.includes(product.id) ? (
+                        <div
+                          className={styles.quantity}
+                          role="group"
+                          aria-label={formatMessage(copy.quantity, {
+                            product: product.name,
+                          })}
+                        >
+                          <button
+                            type="button"
+                            aria-label={formatMessage(copy.decrease, {
+                              product: product.name,
+                            })}
+                            disabled={
+                              (flow.selection.productQuantities?.[product.id] ??
+                                1) <= 1
+                            }
+                            onClick={() =>
+                              flow.choose({
+                                interest: "one_time",
+                                productId: flow.selection.productId,
+                                productIds: selectedProductIds,
+                                productQuantities: {
+                                  ...flow.selection.productQuantities,
+                                  [product.id]:
+                                    (flow.selection.productQuantities?.[
+                                      product.id
+                                    ] ?? 1) - 1,
+                                },
+                              })
+                            }
+                          >
+                            −
+                          </button>
+                          <span aria-live="polite" aria-atomic="true">
+                            {formatMessage(copy.packs, {
+                              count:
+                                flow.selection.productQuantities?.[
+                                  product.id
+                                ] ?? 1,
+                            })}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={formatMessage(copy.increase, {
+                              product: product.name,
+                            })}
+                            disabled={
+                              (flow.selection.productQuantities?.[product.id] ??
+                                1) >= site.maxProductQuantity
+                            }
+                            onClick={() =>
+                              flow.choose({
+                                interest: "one_time",
+                                productId: flow.selection.productId,
+                                productIds: selectedProductIds,
+                                productQuantities: {
+                                  ...flow.selection.productQuantities,
+                                  [product.id]:
+                                    (flow.selection.productQuantities?.[
+                                      product.id
+                                    ] ?? 1) + 1,
+                                },
+                              })
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    flow.choose({ interest: "one_time", productId: null })
-                  }
-                  aria-label="Убрать выбранный кофе"
-                >
-                  ×
-                </button>
-              </div>
+                <p className={styles.quantityHint}>
+                  {formatMessage(copy.quantityHint, {
+                    max: site.maxProductQuantity,
+                  })}
+                </p>
+                {flow.selection.productId ? (
+                  <button
+                    type="button"
+                    className={styles.clearProduct}
+                    onClick={() =>
+                      flow.choose({ interest: "one_time", productId: null })
+                    }
+                  >
+                    {copy.clear}
+                  </button>
+                ) : null}
+                {flow.errors.productId ||
+                flow.errors.productIds ||
+                flow.errors.productQuantities ? (
+                  <p id="error-product" className={styles.error}>
+                    {flow.errors.productQuantities ??
+                      flow.errors.productIds ??
+                      flow.errors.productId}
+                  </p>
+                ) : null}
+              </fieldset>
             ) : flow.selection.interest === "subscription" ? (
               <div className={styles.selection}>
                 <div>
-                  <span className="eyebrow">ВАША ПОДПИСКА</span>
-                  <strong>2 пачки по 250 г каждый месяц</strong>
-                  <span>54 BYN · доставка включена</span>
+                  <span className="eyebrow">{copy.subscription}</span>
+                  <strong>
+                    {formatMessage(copy.subscriptionQuantity, {
+                      count: site.subscription.count,
+                      weight: site.subscription.weight,
+                    })}
+                  </strong>
+                  <span>
+                    {formatMessage(copy.subscriptionPrice, {
+                      price: formatPrice(site.subscription.price, flow.locale),
+                    })}
+                  </span>
                 </div>
               </div>
             ) : null}
             <div className={styles.field}>
               <label htmlFor="lead-comment">
-                Комментарий <span className={styles.optional}>по желанию</span>
+                {copy.comment}{" "}
+                <span className={styles.optional}>{copy.optional}</span>
               </label>
               <textarea
                 id="lead-comment"
                 name="comment"
                 rows={3}
                 maxLength={1000}
-                value={flow.draft.comment}
-                placeholder="Какой кофе любите? Есть пожелания?"
+                defaultValue={flow.draft.comment}
+                placeholder={copy.commentPlaceholder}
                 onChange={(event) => flow.edit("comment", event.target.value)}
-                onBlur={() => flow.validateField("comment")}
+                onBlur={(event) =>
+                  flow.validateField("comment", event.currentTarget.value)
+                }
                 aria-invalid={Boolean(flow.errors.comment)}
                 aria-describedby={
                   flow.errors.comment ? "error-comment" : undefined
@@ -213,13 +406,10 @@ export function LeadForm() {
               disabled={pending}
             >
               {pending
-                ? "Отправляем…"
+                ? copy.submitting
                 : flow.state.type === "error"
-                  ? "Попробовать ещё раз"
-                  : "Оставить заявку"}
-              <span className={actions.arrow} aria-hidden="true">
-                ↗
-              </span>
+                  ? copy.retry
+                  : copy.submit}
             </button>
           </fieldset>
           <div
@@ -229,7 +419,7 @@ export function LeadForm() {
             aria-atomic="true"
           >
             {pending ? (
-              <p>Отправляем вашу заявку…</p>
+              <p>{copy.pending}</p>
             ) : message ? (
               <p
                 className={
@@ -239,15 +429,11 @@ export function LeadForm() {
                 {message}
               </p>
             ) : (
-              <p className={styles.hint}>
-                Оформим заказ после звонка. Оплата на сайте не нужна.
-              </p>
+              <p className={styles.hint}>{copy.hint}</p>
             )}
           </div>
           <noscript>
-            <p className={styles.error}>
-              Для отправки заявки включите JavaScript в браузере.
-            </p>
+            <p className={styles.error}>{copy.noScript}</p>
           </noscript>
         </form>
       </Container>

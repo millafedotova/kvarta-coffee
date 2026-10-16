@@ -1,9 +1,21 @@
-import { products } from "@/content/coffee";
+import type { Locale } from "@/i18n/config";
+import type { LocalizedCoffee } from "@/i18n/products";
+import type { Dictionary } from "@/i18n/types";
 import { Container } from "./container";
 import { CoffeeCard } from "./coffee-card";
 import styles from "./coffee-section.module.css";
 
-export function CoffeeSection() {
+export function CoffeeSection({
+  copy,
+  coffeeCopy,
+  products,
+  locale,
+}: {
+  copy: Dictionary["catalog"];
+  coffeeCopy: Dictionary["coffee"];
+  products: LocalizedCoffee[];
+  locale: Locale;
+}) {
   return (
     <section
       id="coffee"
@@ -13,25 +25,23 @@ export function CoffeeSection() {
       <Container>
         <div className="sectionHeading">
           <div>
-            <span className="eyebrow">01 / НАШ КОФЕ</span>
-            <h2 id="coffee-heading">Зерно и дрипы.</h2>
+            <h2 id="coffee-heading">{copy.title}</h2>
           </div>
-          <p>
-            Цветы и бергамот, карамель или шоколад —
-            <br />
-            выбирайте, что вам ближе.
-          </p>
+          <p>{copy.description}</p>
         </div>
         <div className={styles.grid}>
           {products.map((product) => (
-            <CoffeeCard key={product.id} product={product} />
+            <CoffeeCard
+              key={product.id}
+              product={product}
+              copy={coffeeCopy}
+              locale={locale}
+            />
           ))}
         </div>
         <div className={styles.note}>
-          <span>Не знаете, с чего начать?</span>
-          <a href="#request">
-            Поможем выбрать <span aria-hidden="true">↗</span>
-          </a>
+          <span>{copy.help}</span>
+          <a href="#request">{copy.helpAction}</a>
         </div>
       </Container>
     </section>

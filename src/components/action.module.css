@@ -1,7 +1,7 @@
 .button {
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 32px;
   min-height: 52px;
   padding: 15px 24px;
@@ -40,10 +40,6 @@
 }
 .outline:hover {
   background: var(--sage-light);
-}
-.arrow {
-  font-size: 22px;
-  line-height: 1;
 }
 .textLink {
   display: inline-flex;

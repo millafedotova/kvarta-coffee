@@ -49,6 +49,14 @@ describe("Belarusian phone validation", () => {
   it("accepts a valid Belarusian fixed-line format", () => {
     expect(normalizeBelarusPhone("+375 17 123-45-67")).toBe("+375171234567");
   });
+  it.each(["+375 12 345-67-89", "+375341236346"])(
+    "accepts the Belarusian format %s without requiring a directory-listed code",
+    (number) => {
+      expect(draftSchema.parse({ ...draft, phone: number }).phone).toBe(
+        number.replace(/[ -]/g, ""),
+      );
+    },
+  );
 });
 
 describe("lead draft contract", () => {
@@ -58,7 +66,7 @@ describe("lead draft contract", () => {
     if (!result.success)
       expect(result.error.issues[0]).toMatchObject({
         path: ["phone"],
-        message: "Введите номер телефона.",
+        message: "phoneRequired",
       });
   });
   it("rejects zero bytes in editable contact fields with field errors", () => {
@@ -95,6 +103,60 @@ describe("lead draft contract", () => {
     );
     expect(
       draftSchema.safeParse({ ...draft, comment: "a".repeat(1001) }).success,
+    ).toBe(false);
+  });
+});
+
+describe("multiple coffee selection", () => {
+  it("accepts multiple products and preserves legacy single-product requests", () => {
+    expect(draftSchema.parse(draft).productId).toBe("ethiopia-yirgacheffe");
+    expect(
+      draftSchema.parse({
+        ...draft,
+        productIds: ["ethiopia-yirgacheffe", "colombia-huila"],
+      }).productIds,
+    ).toEqual(["ethiopia-yirgacheffe", "colombia-huila"]);
+  });
+  it("rejects duplicate, unknown, mismatched, and subscription product lists", () => {
+    for (const value of [
+      {
+        ...draft,
+        productIds: ["ethiopia-yirgacheffe", "ethiopia-yirgacheffe"],
+      },
+      { ...draft, productIds: ["unknown"] },
+      { ...draft, productIds: ["colombia-huila"] },
+      {
+        ...draft,
+        interest: "subscription",
+        productId: null,
+        productIds: ["colombia-huila"],
+      },
+    ])
+      expect(draftSchema.safeParse(value).success).toBe(false);
+  });
+});
+
+describe("coffee quantities", () => {
+  it("accepts the maximum of five and rejects invalid quantities", () => {
+    expect(
+      draftSchema.safeParse({
+        ...draft,
+        productQuantities: { "ethiopia-yirgacheffe": 5 },
+      }).success,
+    ).toBe(true);
+    for (const quantity of [0, 6, 1.5, "2", -1]) {
+      expect(
+        draftSchema.safeParse({
+          ...draft,
+          productQuantities: { "ethiopia-yirgacheffe": quantity },
+        }).success,
+      ).toBe(false);
+    }
+    expect(
+      draftSchema.safeParse({
+        ...draft,
+        productQuantities: { "colombia-huila": 1 },
+      }).success,
     ).toBe(false);
   });
 });

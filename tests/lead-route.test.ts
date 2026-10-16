@@ -35,6 +35,27 @@ function validRequest() {
   });
 }
 
+it("accepts a development submission from its actual alternate loopback port", async () => {
+  vi.stubEnv("NODE_ENV", "development");
+  vi.stubEnv("VERCEL", "");
+  storage.save.mockResolvedValueOnce("created");
+  const response = await POST(
+    new Request("http://127.0.0.1:3002/api/lead", {
+      method: "POST",
+      headers: {
+        Origin: "http://127.0.0.1:3002",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...input, phone: "+375 34 777-00-19" }),
+    }),
+  );
+  expect(response.status).toBe(201);
+  expect(await response.json()).toEqual({ status: "created" });
+  expect(storage.save).toHaveBeenCalledWith(
+    expect.objectContaining({ phone: "+375347770019" }),
+  );
+});
+
 it.each(["+375 29 123-45-67", "+375 29 123 45 67", "375291234567"])(
   "accepts %s at the API boundary and stores its canonical number",
   async (phone) => {
@@ -157,7 +178,9 @@ it("returns a phone field error before reaching the unavailable persistence boun
   });
   const response = await POST(request);
   expect(response.status).toBe(400);
-  expect((await response.json()).errors.phone).toContain("белорусский");
+  const body = await response.json();
+  expect(body.errors.phone).toContain("+375");
+  expect(body.errorCodes.phone).toBe("phoneInvalid");
 });
 
 it("rejects oversized bodies without acknowledging a lead", async () => {

@@ -1,39 +1,49 @@
 import { site } from "@/content/site";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { LanguageSwitcher } from "./language-switcher";
 import { Container } from "./container";
 import styles from "./site-header.module.css";
 
-export function SiteHeader() {
+export function SiteHeader({
+  copy,
+  languageCopy,
+  locale,
+  brand,
+}: {
+  copy: Dictionary["header"];
+  languageCopy: Dictionary["language"];
+  locale: Locale;
+  brand: string;
+}) {
   return (
     <>
       <header className={styles.masthead} id="top">
         <Container>
           <div className={styles.topline}>
-            <span>МАСТЕРСКАЯ ОБЖАРКИ КОФЕ</span>
-            <span>МИНСК · С 2019 ГОДА</span>
+            <span className={styles.workshop}>{copy.workshop}</span>
+            <div className={styles.languageRow}>
+              <LanguageSwitcher locale={locale} copy={languageCopy} />
+            </div>
           </div>
-          <a
-            href="#top"
-            aria-label="Кварта — в начало страницы"
-            className={styles.wordmark}
-          >
-            КВАРТА<span className={styles.wordmarkDot}>✳</span>
+          <div className={styles.location}>{copy.location}</div>
+          <a href="#top" aria-label={copy.home} className={styles.wordmark}>
+            {brand.toUpperCase()}
+            <span className={styles.wordmarkDot}>✳</span>
           </a>
-          <div className={styles.baseline}>
-            <span className={styles.smallNote}>ЗЕРНО · ДРИПЫ · ПОДПИСКА</span>
-          </div>
         </Container>
       </header>
-      <nav className={styles.nav} aria-label="Разделы сайта">
+      <nav className={styles.nav} aria-label={copy.navigationLabel}>
         <Container className={styles.navInner}>
           <div className={styles.links}>
             {site.navigation.map((link) => (
               <a key={link.href} href={link.href}>
-                {link.label}
+                {copy[link.key]}
               </a>
             ))}
           </div>
           <a href="#request" className={styles.requestLink}>
-            Оставить заявку <span aria-hidden="true">↗</span>
+            {copy.request}
           </a>
         </Container>
       </nav>

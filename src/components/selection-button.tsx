@@ -25,9 +25,6 @@ export function SelectionButton({
       onClick={() => flow.choose(selection, true)}
     >
       {children}
-      <span className={styles.arrow} aria-hidden="true">
-        ↗
-      </span>
     </button>
   );
 }

@@ -12,6 +12,23 @@ it("requires explicit origin configuration in a deployment", () => {
   vi.stubEnv("LEAD_ALLOWED_ORIGINS", "");
   expect(() => allowedOrigins()).toThrow();
 });
+it("allows only the active loopback port when development moves to another port", () => {
+  vi.stubEnv("NODE_ENV", "development");
+  vi.stubEnv("VERCEL", "");
+  vi.stubEnv("LEAD_ALLOWED_ORIGINS", "http://localhost:3000");
+  const origins = allowedOrigins("http://127.0.0.1:3002/api/lead");
+  expect(origins.has("http://127.0.0.1:3002")).toBe(true);
+  expect(origins.has("http://localhost:3002")).toBe(true);
+  expect(origins.has("http://localhost:3003")).toBe(false);
+  expect(origins.has("https://unrelated.example")).toBe(false);
+  expect(allowedOrigins("https://unrelated.example/api/lead").size).toBe(1);
+});
+it("does not infer allowed origins from the request URL in production", () => {
+  vi.stubEnv("NODE_ENV", "production");
+  vi.stubEnv("LEAD_ALLOWED_ORIGINS", "https://kvarta.example");
+  const origins = allowedOrigins("http://127.0.0.1:3002/api/lead");
+  expect([...origins]).toEqual(["https://kvarta.example"]);
+});
 it("allows configured production and preview origins without wildcard expansion", () => {
   vi.stubEnv("VERCEL", "1");
   vi.stubEnv("SITE_URL", "https://kvarta.example");

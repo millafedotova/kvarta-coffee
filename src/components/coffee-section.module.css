@@ -9,11 +9,60 @@
   min-width: 0;
 }
 .photo {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
   position: relative;
   aspect-ratio: 1;
   background: #eeeee7;
   border-radius: 12px;
   overflow: hidden;
+}
+.detailsButton {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-top: auto;
+  padding: 8px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--forest);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.detailsButton:hover {
+  color: var(--forest-deep);
+}
+.detailsButton:active {
+  opacity: 0.7;
+}
+.nameButton {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nameButton:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+.nameButton:active,
+.photo:active {
+  opacity: 0.8;
 }
 .image {
   object-fit: contain;
@@ -57,7 +106,7 @@
 .forest {
   background: var(--forest);
 }
-.card h3 {
+.card > h3 {
   font-size: 23px;
   line-height: 1.17;
   margin-top: 12px;
@@ -73,7 +122,7 @@
   margin-top: 4px;
 }
 .cardBottom {
-  margin-top: auto;
+  margin-top: 0;
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
@@ -116,7 +165,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     row-gap: 40px;
   }
-  .card h3 {
+  .card > h3 {
     font-size: 26px;
   }
   .cardButton {

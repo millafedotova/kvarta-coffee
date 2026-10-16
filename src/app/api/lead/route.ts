@@ -1,5 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { leadSchema, getFieldErrors } from "@/lib/lead-validation";
+import {
+  leadSchema,
+  getFieldErrors,
+  getFieldErrorCodes,
+} from "@/lib/lead-validation";
 import { allowedOrigins, ConfigurationError } from "@/lib/env";
 import { getPool } from "@/lib/db";
 import { createLeadRepository } from "@/lib/lead-repository";
@@ -29,7 +33,7 @@ export async function POST(request: Request) {
   const requestId = randomUUID();
   let origins: Set<string>;
   try {
-    origins = allowedOrigins();
+    origins = allowedOrigins(request.url);
   } catch (error) {
     return unavailable(requestId, error);
   }
@@ -80,7 +84,11 @@ export async function POST(request: Request) {
   const parsed = leadSchema.safeParse(input);
   if (!parsed.success)
     return Response.json(
-      { status: "invalid", errors: getFieldErrors(parsed.error) },
+      {
+        status: "invalid",
+        errors: getFieldErrors(parsed.error),
+        errorCodes: getFieldErrorCodes(parsed.error),
+      },
       { status: 400, headers },
     );
   try {

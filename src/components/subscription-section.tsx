@@ -1,67 +1,60 @@
 import Image from "next/image";
+import type { Locale } from "@/i18n/config";
+import { formatMessage, formatNumber } from "@/i18n/format";
+import type { Dictionary } from "@/i18n/types";
 import { site } from "@/content/site";
 import { Container } from "./container";
 import { SelectionButton } from "./selection-button";
 import styles from "./subscription-section.module.css";
 
-export function SubscriptionSection() {
+export function SubscriptionSection({
+  copy,
+  locale,
+}: {
+  copy: Dictionary["subscription"];
+  locale: Locale;
+}) {
   return (
     <section id="subscription" aria-labelledby="subscription-heading">
       <Container>
         <div className={styles.panel}>
           <div className={styles.copy}>
-            <span className="eyebrow">02 / ПОДПИСКА НА КОФЕ</span>
-            <h2 id="subscription-heading">
-              Две пачки
-              <br />
-              каждый месяц.
-            </h2>
-            <p className={styles.description}>
-              Подписка на кофе с доставкой по Минску.
-            </p>
+            <span className="eyebrow">{copy.eyebrow}</span>
+            <h2 id="subscription-heading">{copy.title.join(" ")}</h2>
             <div className={styles.offer}>
               <strong>
-                {site.subscription.price}
-                <span>BYN / месяц</span>
+                {formatNumber(site.subscription.price, locale)}
+                <span>{copy.monthly}</span>
               </strong>
               <p>
-                2 пачки × 250 г<br />
-                Доставка по Минску включена
+                {formatMessage(copy.quantity, {
+                  count: site.subscription.count,
+                  weight: site.subscription.weight,
+                })}
+                <br />
+                {copy.included}
               </p>
             </div>
             <SelectionButton
               selection={{ interest: "subscription", productId: null }}
               light
             >
-              Хочу подписку
+              {copy.action}
             </SelectionButton>
-            <ol className={styles.steps}>
-              <li>
-                <span>01</span>Оставляете заявку
-              </li>
-              <li>
-                <span>02</span>Согласуем детали по телефону
-              </li>
-              <li>
-                <span>03</span>Получаете кофе каждый месяц
-              </li>
-            </ol>
+            <ul className={styles.steps}>
+              {copy.steps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
           </div>
           <div className={styles.photo}>
             <Image
               src="/images/coffee-foam.jpg"
-              alt="Кофейная пенка крупным планом"
+              alt={copy.imageAlt}
               fill
               sizes="(max-width: 767px) 100vw, 45vw"
               className={styles.image}
             />
-            <div className={styles.caption}>
-              <span className="eyebrow">ПОДПИСКА НА КОФЕ</span>
-              <span>
-                54 BYN
-                <br />в месяц.
-              </span>
-            </div>
           </div>
         </div>
       </Container>

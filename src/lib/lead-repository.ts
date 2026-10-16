@@ -62,6 +62,8 @@ export function createLeadRepository(pool: Pool) {
         await client.query("COMMIT");
         return "duplicate";
       }
+      const selectedIds =
+        input.productIds ?? (input.productId ? [input.productId] : []);
       const attribution = input.attribution;
       const campaign = attribution?.campaign;
       await client.query(
@@ -69,15 +71,15 @@ export function createLeadRepository(pool: Pool) {
         INSERT INTO leads (
           lead_id, name, phone, interest, product_id, comment, created_at,
           utm_source, utm_medium, utm_campaign, utm_content, utm_term,
-          landing_url, submission_url, referrer, entered_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8, $9, $10, $11, $12, $13, $14, $15, $16::timestamptz)
+          landing_url, submission_url, referrer, entered_at, product_ids, product_quantities
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8, $9, $10, $11, $12, $13, $14, $15, $16::timestamptz, $17::text[], $18::integer[])
       `,
         [
           randomUUID(),
           input.name,
           input.phone,
           input.interest,
-          input.productId,
+          input.productId ?? input.productIds?.[0] ?? null,
           input.comment,
           decisionTime,
           campaign?.utm_source ?? null,
@@ -89,6 +91,8 @@ export function createLeadRepository(pool: Pool) {
           input.submissionUrl || null,
           attribution?.referrer || null,
           attribution?.enteredAt ?? null,
+          selectedIds,
+          selectedIds.map((id) => input.productQuantities?.[id] ?? 1),
         ],
       );
       await client.query("COMMIT");

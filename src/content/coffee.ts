@@ -8,65 +8,52 @@ export type ProductId = (typeof productIds)[number];
 
 export interface CoffeeProduct {
   id: ProductId;
-  name: string;
-  origin: string;
-  notes: string;
-  detail: string;
-  size: string;
   price: number;
   image: string;
-  imageAlt: string;
   accent: "sage" | "clay" | "ochre" | "forest";
+  package: { kind: "grams" | "bags"; count: number };
 }
 
 export const products: readonly CoffeeProduct[] = [
   {
     id: "ethiopia-yirgacheffe",
-    name: "Эфиопия Иргачеффе",
-    origin: "ЭФИОПИЯ",
-    notes: "Цветы, бергамот",
-    detail: "Светлая обжарка",
-    size: "250 г",
     price: 32,
     image: "/images/ethiopia-v2.png",
-    imageAlt: "Светлая пачка кофе Кварта — Эфиопия Иргачеффе",
     accent: "sage",
+    package: {
+      kind: "grams",
+      count: 250,
+    },
   },
   {
     id: "colombia-huila",
-    name: "Колумбия Уила",
-    origin: "КОЛУМБИЯ",
-    notes: "Карамель, красное яблоко",
-    detail: "Свежая обжарка",
-    size: "250 г",
     price: 29,
-    image: "/images/colombia-v2.png",
-    imageAlt: "Светлая пачка кофе Кварта — Колумбия Уила",
+    image: "/images/colombia-v3.png",
     accent: "clay",
+    package: {
+      kind: "grams",
+      count: 250,
+    },
   },
   {
     id: "brazil-cerrado",
-    name: "Бразилия Серрадо",
-    origin: "БРАЗИЛИЯ",
-    notes: "Орех, шоколад",
-    detail: "Под эспрессо",
-    size: "250 г",
     price: 26,
     image: "/images/brazil-v2.png",
-    imageAlt: "Светлая пачка кофе Кварта — Бразилия Серрадо",
     accent: "ochre",
+    package: {
+      kind: "grams",
+      count: 250,
+    },
   },
   {
     id: "drip-assortment",
-    name: "Дрипы, ассорти",
-    origin: "ДРИП-ПАКЕТЫ",
-    notes: "Набор дрип-пакетов",
-    detail: "Заваривайте прямо в чашке",
-    size: "10 штук",
     price: 18,
     image: "/images/drips.png",
-    imageAlt: "Коробка и дрип-пакет кофе Кварта",
     accent: "forest",
+    package: {
+      kind: "bags",
+      count: 10,
+    },
   },
 ];
 

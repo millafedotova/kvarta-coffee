@@ -1,0 +1,105 @@
+.gallery {
+  min-width: 0;
+  margin: 0;
+}
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 12px;
+  background: var(--sage-light);
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  min-width: 0;
+  aspect-ratio: 1.15;
+  overflow: hidden;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.caption {
+  min-height: 36px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.counter {
+  color: var(--forest);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.counter span {
+  color: var(--muted);
+}
+
+.buttons {
+  display: flex;
+  grid-column: 2;
+  gap: 8px;
+}
+
+.button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--forest);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--forest);
+  cursor: pointer;
+  transition:
+    background-color 160ms,
+    color 160ms,
+    transform 160ms;
+}
+
+.button svg {
+  display: block;
+}
+
+@media (hover: hover) {
+  .button:hover {
+    background: var(--forest);
+    color: var(--paper);
+  }
+}
+
+.button:active {
+  background: var(--forest-deep);
+  color: var(--paper);
+  transform: scale(0.94);
+}
+
+@media (max-width: 767px) {
+  .slide {
+    aspect-ratio: 1.25;
+  }
+}

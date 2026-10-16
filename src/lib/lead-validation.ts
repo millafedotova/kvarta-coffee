@@ -1,10 +1,20 @@
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { z } from "zod";
+import { ruErrors } from "@/i18n/dictionaries/ru-errors";
+import {
+  leadFields,
+  leadErrorCodes,
+  isLeadErrorCode,
+  type FieldErrorCodes,
+  type LeadErrorCode,
+  type LeadField,
+} from "./lead-errors";
 import { pageUrlSchema } from "./page-context";
 import {
   attributionSchema,
   interests,
   productIdSchema,
+  productIdsSchema,
+  productQuantitiesSchema,
   type FieldErrors,
 } from "./lead-contract";
 
@@ -14,24 +24,28 @@ export function normalizeBelarusPhone(value: string): string | null {
     "",
   );
   if (!/^\+?\d+$/.test(compact)) return null;
-  const phone = parsePhoneNumberFromString(compact, {
-    defaultCountry: "BY",
-    extract: false,
-  });
-  return phone?.country === "BY" && phone.isValid() ? phone.number : null;
+  // Validate the national format without rejecting codes missing from a directory.
+  const national = compact.startsWith("+375")
+    ? compact.slice(4)
+    : compact.startsWith("375") && compact.length === 12
+      ? compact.slice(3)
+      : compact.startsWith("80") && compact.length === 11
+        ? compact.slice(2)
+        : compact;
+  return /^[1-9]\d{8}$/.test(national) ? `+375${national}` : null;
 }
 
 const phoneSchema = z
   .string()
   .trim()
-  .min(1, "Введите номер телефона.")
-  .max(64, "Проверьте номер телефона.")
+  .min(1, "phoneRequired")
+  .max(64, "phoneTooLong")
   .transform((value, context) => {
     const phone = normalizeBelarusPhone(value);
     if (!phone) {
       context.addIssue({
         code: "custom",
-        message: "Введите белорусский номер: +375291234567 или 291234567.",
+        message: "phoneInvalid",
       });
       return z.NEVER;
     }
@@ -43,31 +57,54 @@ export const draftSchema = z
     name: z
       .string()
       .trim()
-      .min(1, "Как к вам обращаться?")
-      .max(100, "Введите имя не длиннее 100 символов.")
-      .refine(
-        (value) => !value.includes("\u0000"),
-        "Введите имя заново: в нём есть недопустимый символ.",
-      ),
+      .min(1, "nameRequired")
+      .max(100, "nameTooLong")
+      .refine((value) => !value.includes("\u0000"), "nameInvalid"),
     phone: phoneSchema,
-    interest: z.enum(interests, { error: "Выберите, что вас интересует." }),
+    interest: z.enum(interests, { error: "interestRequired" }),
     productId: productIdSchema,
+    productIds: productIdsSchema,
+    productQuantities: productQuantitiesSchema,
     comment: z
       .string()
       .trim()
-      .max(1000, "Сократите комментарий до 1000 символов.")
-      .refine(
-        (value) => !value.includes("\u0000"),
-        "Введите комментарий заново или оставьте поле пустым.",
-      )
+      .max(1000, "commentTooLong")
+      .refine((value) => !value.includes("\u0000"), "commentInvalid")
       .default(""),
   })
   .superRefine((value, context) => {
-    if (value.interest !== "one_time" && value.productId !== null) {
+    if (
+      value.interest !== "one_time" &&
+      (value.productId !== null || value.productIds?.length)
+    ) {
       context.addIssue({
         code: "custom",
         path: ["productId"],
-        message: "Выберите кофе для разового заказа.",
+        message: "productSelectionInvalid",
+      });
+    }
+    const selectedIds =
+      value.productIds ?? (value.productId ? [value.productId] : []);
+    if (
+      Object.keys(value.productQuantities ?? {}).some(
+        (id) => !selectedIds.some((selected) => selected === id),
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["productQuantities"],
+        message: "quantitiesInvalid",
+      });
+    }
+    if (
+      value.productIds !== undefined &&
+      value.productId !== null &&
+      value.productIds[0] !== value.productId
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["productIds"],
+        message: "productsInvalid",
       });
     }
   });
@@ -78,12 +115,52 @@ export const leadSchema = draftSchema.safeExtend({
 });
 export type LeadInput = z.infer<typeof leadSchema>;
 
+const fallbackErrors: Record<LeadField, LeadErrorCode> = {
+  name: "nameRequired",
+  phone: "phoneInvalid",
+  interest: "interestRequired",
+  comment: "commentInvalid",
+  productId: "productsInvalid",
+  productIds: "productsInvalid",
+  productQuantities: "quantitiesInvalid",
+};
+
+export function getFieldErrorCodes(error: z.ZodError): FieldErrorCodes {
+  const result: FieldErrorCodes = {};
+  for (const field of leadFields) {
+    const issue = error.issues.find((item) => item.path[0] === field);
+    if (issue)
+      result[field] = isLeadErrorCode(issue.message)
+        ? issue.message
+        : fallbackErrors[field];
+  }
+  return result;
+}
+
 export function getFieldErrors(error: z.ZodError): FieldErrors {
   const result: FieldErrors = {};
-  const fields = ["name", "phone", "interest", "comment", "productId"] as const;
-  for (const field of fields) {
-    const issue = error.issues.find((item) => item.path[0] === field);
-    if (issue) result[field] = issue.message;
+  const codes = getFieldErrorCodes(error);
+  for (const field of leadFields) {
+    const code = codes[field];
+    if (code) result[field] = ruErrors[code];
+  }
+  return result;
+}
+
+export function resolveServerErrors(
+  errors: FieldErrors,
+  codes?: FieldErrors,
+): FieldErrorCodes {
+  const result: FieldErrorCodes = {};
+  for (const field of leadFields) {
+    if (errors[field] === undefined && codes?.[field] === undefined) continue;
+    const code = codes?.[field];
+    if (isLeadErrorCode(code)) result[field] = code;
+    else
+      result[field] =
+        leadErrorCodes.find(
+          (legacyCode) => ruErrors[legacyCode] === errors[field],
+        ) ?? fallbackErrors[field];
   }
   return result;
 }

@@ -46,9 +46,10 @@
   color: var(--inverse-muted);
   font-size: 11px;
 }
-.bottom span:nth-child(2) {
-  letter-spacing: 0.08em;
-  font-size: 10px;
+.languageRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
 }
 @media (max-width: 767px) {
   .top {

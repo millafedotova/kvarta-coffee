@@ -9,13 +9,10 @@
 .copy {
   padding-block: 12px;
 }
-.copy > :global(.eyebrow) {
-  color: var(--muted);
-}
 .copy h1 {
   font-size: clamp(48px, 5.4vw, 64px);
   line-height: 1.02;
-  margin-top: 28px;
+  margin-top: 0;
 }
 .copy h1 span {
   color: var(--forest);
@@ -37,7 +34,7 @@
 }
 .photo {
   position: relative;
-  min-height: 560px;
+  min-height: 480px;
   overflow: hidden;
   border-radius: 14px;
   background: #3a251a;
@@ -45,27 +42,6 @@
 .image {
   object-fit: cover;
   object-position: 52% 55%;
-}
-.photoLabel {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background: var(--paper);
-  color: var(--forest-deep);
-  border-radius: 10px;
-  padding: 24px;
-  width: 190px;
-}
-.photoLabel strong {
-  display: block;
-  font-family: var(--display);
-  font-size: 56px;
-  letter-spacing: -0.04em;
-  line-height: 1.2;
-  margin-block: 8px;
-}
-.photoLabel > span:last-child {
-  font-size: 13px;
 }
 @media (max-width: 1023px) {
   .grid {
@@ -75,7 +51,7 @@
     font-size: 52px;
   }
   .photo {
-    min-height: 520px;
+    min-height: 440px;
   }
 }
 @media (max-width: 767px) {
@@ -91,7 +67,7 @@
   }
   .copy h1 {
     font-size: clamp(43px, 11.5vw, 62px);
-    margin-top: 20px;
+    margin-top: 0;
   }
   .copy p {
     font-size: 16px;
@@ -103,14 +79,5 @@
   .photo {
     min-height: 0;
     aspect-ratio: 1.1;
-  }
-  .photoLabel {
-    bottom: 16px;
-    left: 16px;
-    padding: 16px;
-    width: 165px;
-  }
-  .photoLabel strong {
-    font-size: 40px;
   }
 }

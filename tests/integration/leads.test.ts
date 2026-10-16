@@ -45,6 +45,50 @@ const draft = {
 };
 const input = () => leadSchema.parse(draft);
 
+it("deduplicates locale changes and preserves the original multilingual inquiry", async () => {
+  const original = {
+    ...draft,
+    name: "Сінтэтычны тэст / Synthetic test",
+    comment: "Тэставая заяўка. Не тэлефанаваць.",
+    submissionUrl: "http://localhost:3000/be?utm_source=localization-test",
+    attribution: {
+      version: 1,
+      landingUrl: "http://localhost:3000/ru?utm_source=localization-test",
+      referrer: "",
+      enteredAt: "2026-10-16T12:00:00Z",
+      campaign: { utm_source: "localization-test" },
+    },
+  };
+  for (const [index, locale] of ["be", "en", "ru"].entries()) {
+    const response = await POST(
+      new Request("http://localhost:3000/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...original,
+          submissionUrl: `http://localhost:3000/${locale}?utm_source=localization-test`,
+        }),
+      }),
+    );
+    expect(response.status).toBe(index === 0 ? 201 : 200);
+    expect(await response.json()).toEqual({
+      status: index === 0 ? "created" : "duplicate",
+    });
+  }
+  const stored = await pool.query(
+    "SELECT name, comment, submission_url, landing_url, utm_source FROM leads",
+  );
+  expect(stored.rows).toEqual([
+    {
+      name: original.name,
+      comment: original.comment,
+      submission_url: original.submissionUrl,
+      landing_url: original.attribution.landingUrl,
+      utm_source: "localization-test",
+    },
+  ]);
+});
+
 beforeAll(async () => {
   await applyMigrations(pool);
   await applyMigrations(pool);
@@ -64,7 +108,7 @@ it("migrates once and rejects values that violate database constraints", async (
   expect(
     (await pool.query("SELECT count(*)::int AS count FROM schema_migrations"))
       .rows[0].count,
-  ).toBe(2);
+  ).toBe(4);
   await expect(
     pool.query(
       "INSERT INTO leads (lead_id, name, phone, interest) VALUES ($1, 'Test', '+79991234567', 'question')",
@@ -336,6 +380,8 @@ it("persists sanitized campaign context and survives a lost response followed by
     ...draft,
     interest: "one_time",
     productId: "colombia-huila",
+    productIds: ["colombia-huila", "brazil-cerrado"],
+    productQuantities: { "colombia-huila": 2, "brazil-cerrado": 5 },
     attribution: {
       version: 1,
       enteredAt: "2026-10-15T08:00:00.000Z",
@@ -373,6 +419,8 @@ it("persists sanitized campaign context and survives a lost response followed by
   expect(result.rows[0]).toMatchObject({
     phone: draft.phone,
     product_id: "colombia-huila",
+    product_ids: ["colombia-huila", "brazil-cerrado"],
+    product_quantities: [2, 5],
     comment: draft.comment,
     utm_source: "instagram",
     utm_medium: "cpc",
@@ -383,4 +431,14 @@ it("persists sanitized campaign context and survives a lost response followed by
     submission_url: "https://example.com/?utm_source=instagram",
     referrer: "https://search.example/",
   });
+});
+
+it("rejects quantities above five at the database boundary", async () => {
+  await expect(
+    pool.query(
+      `INSERT INTO leads (lead_id, name, phone, interest, product_id, product_ids, product_quantities)
+    VALUES ($1, 'Quantity check', '+375291234567', 'one_time', 'colombia-huila', ARRAY['colombia-huila'], ARRAY[6])`,
+      [randomUUID()],
+    ),
+  ).rejects.toMatchObject({ code: "23514" });
 });
