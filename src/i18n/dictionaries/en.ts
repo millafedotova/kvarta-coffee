@@ -342,9 +342,11 @@ export const en = {
     pending: "Sending your inquiry…",
     hint: "We'll confirm your order by phone. No payment is needed on the website.",
     noScript: "Enable JavaScript in your browser to send an inquiry.",
-    success: "Inquiry received. We'll call to agree the details of your order.",
+    successTitle: "Thank you for your inquiry!",
+    success: "We'll be in touch within a day.",
+    duplicateTitle: "We already have your inquiry",
     duplicate:
-      "We already have your inquiry. There's no need to send it again — we'll be in touch.",
+      "There's no need to send it again. We'll be in touch within a day.",
   },
   errors: {
     nameRequired: "What should we call you?",

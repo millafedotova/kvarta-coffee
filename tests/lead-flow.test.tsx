@@ -99,7 +99,7 @@ it.each([
     });
     await user.click(screen.getByLabelText("Есть вопрос"));
     await user.click(screen.getByRole("button", { name: /Оставить заявку/ }));
-    await screen.findByText(/Заявка получена/);
+    await screen.findByText(ru.form.success);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/lead",
       expect.objectContaining({
@@ -175,7 +175,7 @@ it("selects multiple coffees, removes one independently, and submits all remaini
   await user.click(decrease);
   expect(increase.disabled).toBe(false);
   await user.click(screen.getByRole("button", { name: /Оставить заявку/ }));
-  await screen.findByText(/Заявка получена/);
+  await screen.findByText(ru.form.success);
   const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
   expect(body).toMatchObject({
     name: "Product selection check",
@@ -233,7 +233,9 @@ it("sends one immutable request while duplicate submit events are pending", asyn
   expect(fetchMock).toHaveBeenCalledTimes(1);
   complete(Response.json({ status: "duplicate" }, { status: 200 }));
   await waitFor(() =>
-    expect(screen.getByText(/Ваша заявка уже получена/)).toBeTruthy(),
+    expect(
+      screen.getByRole("heading", { name: ru.form.duplicateTitle }),
+    ).toBeTruthy(),
   );
 });
 

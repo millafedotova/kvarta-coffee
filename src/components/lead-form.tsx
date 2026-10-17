@@ -24,6 +24,23 @@ export function LeadForm({
 }) {
   const flow = useLeadFlow();
   const form = useRef<HTMLFormElement>(null);
+  const confirmation = useRef<HTMLHeadingElement>(null);
+  const previousState = useRef(flow.state.type);
+  const acknowledged =
+    flow.state.type === "success" || flow.state.type === "duplicate";
+
+  useEffect(() => {
+    if (previousState.current === "submitting" && acknowledged) {
+      confirmation.current?.focus({ preventScroll: true });
+      confirmation.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+        block: "center",
+      });
+    }
+    previousState.current = flow.state.type;
+  }, [acknowledged, flow.state.type]);
   const interestOptions = interests.map((value) => ({
     value,
     label: copy.interests[value],
@@ -98,14 +115,19 @@ export function LeadForm({
           className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
-            void flow.submit(readVisibleDraft(event.currentTarget));
+            if (!acknowledged)
+              void flow.submit(readVisibleDraft(event.currentTarget));
           }}
           onInputCapture={(event) => syncVisibleDraft(event.currentTarget)}
           onChangeCapture={(event) => syncVisibleDraft(event.currentTarget)}
           onFocusCapture={(event) => syncVisibleDraft(event.currentTarget)}
           aria-busy={pending}
         >
-          <fieldset disabled={pending} className={styles.fields}>
+          <fieldset
+            disabled={pending || acknowledged}
+            hidden={acknowledged}
+            className={styles.fields}
+          >
             <div className={styles.field}>
               <label htmlFor="lead-name">
                 {copy.name} <span>*</span>
@@ -413,21 +435,35 @@ export function LeadForm({
             </button>
           </fieldset>
           <div
-            className={styles.status}
+            className={acknowledged ? styles.confirmation : styles.status}
             role="status"
             aria-live="polite"
             aria-atomic="true"
           >
-            {pending ? (
+            {acknowledged ? (
+              <>
+                <span className={styles.check} aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path
+                      d="m7 16 6 6L25 10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <h3 ref={confirmation} tabIndex={-1}>
+                  {flow.state.type === "success"
+                    ? copy.successTitle
+                    : copy.duplicateTitle}
+                </h3>
+                <p>{message}</p>
+              </>
+            ) : pending ? (
               <p>{copy.pending}</p>
             ) : message ? (
-              <p
-                className={
-                  flow.state.type === "error" ? styles.error : styles.success
-                }
-              >
-                {message}
-              </p>
+              <p className={styles.error}>{message}</p>
             ) : (
               <p className={styles.hint}>{copy.hint}</p>
             )}

@@ -133,7 +133,9 @@ export interface Dictionary {
     pending: string;
     hint: string;
     noScript: string;
+    successTitle: string;
     success: string;
+    duplicateTitle: string;
     duplicate: string;
   };
   errors: Record<LeadErrorCode, string>;

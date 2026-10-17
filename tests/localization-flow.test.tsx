@@ -238,6 +238,12 @@ it.each(["created", "duplicate"] as const)(
     await screen.findByText(
       status === "created" ? ru.form.success : ru.form.duplicate,
     );
+    expect(document.activeElement).toBe(
+      screen.getByRole("heading", {
+        name:
+          status === "created" ? ru.form.successTitle : ru.form.duplicateTitle,
+      }),
+    );
     await user.click(
       screen.getByRole("button", { name: "Prepare English navigation" }),
     );
@@ -246,6 +252,52 @@ it.each(["created", "duplicate"] as const)(
     await screen.findByText(
       status === "created" ? en.form.success : en.form.duplicate,
     );
+    expect(screen.queryByRole("button", { name: en.form.submit })).toBeNull();
+    expect(document.activeElement?.tagName).not.toBe("H3");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  },
+);
+
+it.each(["ru", "en", "be"] as const)(
+  "shows a prominent confirmation only after the server accepts the %s inquiry",
+  async (locale) => {
+    const copy = dictionaries[locale];
+    let complete: (response: Response) => void = () => {};
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          complete = resolve;
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<FormPage locale={locale} />);
+    await user.type(
+      screen.getByLabelText(`${copy.form.name} *`),
+      "Test inquiry",
+    );
+    await user.type(
+      screen.getByLabelText(`${copy.form.phone} *`),
+      "+375291234567",
+    );
+    await user.click(screen.getByLabelText(copy.form.interests.question));
+    const submit = screen.getByRole("button", { name: copy.form.submit });
+    const form = submit.closest("form");
+    if (!form) throw new Error("Expected inquiry form");
+    await user.click(submit);
+    expect(
+      screen.queryByRole("heading", { name: copy.form.successTitle }),
+    ).toBeNull();
+    expect(screen.getByText(copy.form.pending)).toBeTruthy();
+    complete(Response.json({ status: "created" }, { status: 201 }));
+    const heading = await screen.findByRole("heading", {
+      name: copy.form.successTitle,
+    });
+    expect(document.activeElement).toBe(heading);
+    expect(screen.getByRole("status").textContent).toContain(copy.form.success);
+    expect(screen.queryByRole("button", { name: copy.form.submit })).toBeNull();
+    expect(screen.queryByRole("textbox")).toBeNull();
+    fireEvent.submit(form);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   },
 );
