@@ -7,8 +7,11 @@ import {
 import { allowedOrigins, ConfigurationError } from "@/lib/env";
 import { getPool } from "@/lib/db";
 import { createLeadRepository } from "@/lib/lead-repository";
+import { databaseErrorCode } from "@/lib/database-errors";
 
 export const runtime = "nodejs";
+// Two connection attempts and transactions, plus the bounded request-body read.
+export const maxDuration = 45;
 
 const headers = { "Cache-Control": "no-store" };
 function invalid() {
@@ -24,6 +27,7 @@ function unavailable(requestId: string, error: unknown) {
       requestId,
       category:
         error instanceof ConfigurationError ? "configuration" : "persistence",
+      reason: databaseErrorCode(error),
     }),
   );
   return Response.json({ status: "unavailable" }, { status: 503, headers });

@@ -99,6 +99,23 @@ it("keeps persistence failures distinct from malformed JSON", async () => {
   expect(storage.save).not.toHaveBeenCalled();
 });
 
+it("logs a database failure code without exposing connection details or contact data", async () => {
+  storage.save.mockRejectedValueOnce(
+    Object.assign(new Error("private database credentials"), {
+      code: "ECONNRESET",
+    }),
+  );
+  expect((await POST(validRequest())).status).toBe(503);
+  const log = vi.mocked(console.error).mock.calls[0][0];
+  expect(JSON.parse(String(log))).toMatchObject({
+    event: "lead_unavailable",
+    category: "persistence",
+    reason: "ECONNRESET",
+  });
+  expect(String(log)).not.toContain("private database credentials");
+  expect(String(log)).not.toContain(input.phone);
+});
+
 it("does not report a deployed configuration failure as a field error", async () => {
   vi.stubEnv("VERCEL", "1");
   vi.stubEnv("LEAD_ALLOWED_ORIGINS", "");

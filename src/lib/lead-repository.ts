@@ -2,6 +2,10 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import type { LeadInput } from "./lead-validation";
+import {
+  databaseErrorCode,
+  isTransientDatabaseError,
+} from "./database-errors.ts";
 
 export const recentLeadQuery = `
   SELECT EXISTS (
@@ -18,9 +22,7 @@ export function phoneLockKey(phone: string): string {
 }
 
 export function createLeadRepository(pool: Pool) {
-  return async function saveLead(
-    input: LeadInput,
-  ): Promise<"created" | "duplicate"> {
+  async function saveOnce(input: LeadInput): Promise<"created" | "duplicate"> {
     const client = await pool.connect();
     let released = false;
     let connectionFailed = false;
@@ -110,6 +112,25 @@ export function createLeadRepository(pool: Pool) {
     } finally {
       clearTimeout(deadline);
       release(connectionFailed);
+    }
+  }
+
+  return async function saveLead(
+    input: LeadInput,
+  ): Promise<"created" | "duplicate"> {
+    try {
+      return await saveOnce(input);
+    } catch (error) {
+      if (!isTransientDatabaseError(error)) throw error;
+      console.warn(
+        JSON.stringify({
+          event: "lead_persistence_retry",
+          reason: databaseErrorCode(error),
+        }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      // A fresh transaction rechecks the phone lock even if COMMIT's reply was lost.
+      return saveOnce(input);
     }
   };
 }

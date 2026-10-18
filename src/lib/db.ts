@@ -1,6 +1,7 @@
 import "server-only";
 import { Pool } from "pg";
 import { databaseUrl } from "./env";
+import { databaseErrorCode } from "./database-errors";
 
 let pool: Pool | undefined;
 
@@ -9,13 +10,16 @@ export function getPool(): Pool {
     pool = new Pool({
       connectionString: databaseUrl(),
       max: 3,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000,
       idleTimeoutMillis: 5000,
       allowExitOnIdle: true,
     });
-    pool.on("error", () => {
+    pool.on("error", (error: Error) => {
       console.error(
-        JSON.stringify({ event: "database_idle_connection_error" }),
+        JSON.stringify({
+          event: "database_idle_connection_error",
+          reason: databaseErrorCode(error),
+        }),
       );
     });
   }

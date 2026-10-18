@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, afterAll, expect, it } from "vitest";
+import { beforeAll, beforeEach, afterAll, expect, it, vi } from "vitest";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -44,6 +44,72 @@ const draft = {
   comment: "Test fixture",
 };
 const input = () => leadSchema.parse(draft);
+
+it("recovers from an initial connection timeout within one save call", async () => {
+  const connect = vi
+    .spyOn(pool, "connect")
+    .mockRejectedValueOnce(
+      new Error("Connection terminated due to connection timeout"),
+    );
+  try {
+    expect(await save(input())).toBe("created");
+    expect(connect).toHaveBeenCalledTimes(2);
+  } finally {
+    connect.mockRestore();
+  }
+  expect(
+    (await pool.query("SELECT count(*)::int AS count FROM leads")).rows[0]
+      .count,
+  ).toBe(1);
+});
+
+it("stops after one reconnect if the database stays unavailable", async () => {
+  const error = Object.assign(new Error("Socket reset"), {
+    code: "ECONNRESET",
+  });
+  const connect = vi.spyOn(pool, "connect").mockRejectedValue(error);
+  try {
+    await expect(save(input())).rejects.toBe(error);
+    expect(connect).toHaveBeenCalledTimes(2);
+  } finally {
+    connect.mockRestore();
+  }
+  expect(
+    (await pool.query("SELECT count(*)::int AS count FROM leads")).rows[0]
+      .count,
+  ).toBe(0);
+});
+
+it("does not retry a rejected database password", async () => {
+  const error = Object.assign(new Error("Authentication failed"), {
+    code: "28P01",
+  });
+  const connect = vi.spyOn(pool, "connect").mockRejectedValue(error);
+  try {
+    await expect(save(input())).rejects.toBe(error);
+    expect(connect).toHaveBeenCalledTimes(1);
+  } finally {
+    connect.mockRestore();
+  }
+});
+
+it("reconnects after losing a COMMIT reply without creating a second row", () => {
+  const output = execFileSync(
+    process.execPath,
+    [
+      "--conditions=react-server",
+      fileURLToPath(
+        new URL("../fixtures/lead-lost-commit.mjs", import.meta.url),
+      ),
+    ],
+    {
+      encoding: "utf8",
+      timeout: 10000,
+      env: { ...process.env, TEST_DATABASE_URL: testUrl },
+    },
+  );
+  expect(JSON.parse(output)).toEqual({ result: "duplicate", rows: 1 });
+});
 
 it("deduplicates locale changes and preserves the original multilingual inquiry", async () => {
   const original = {

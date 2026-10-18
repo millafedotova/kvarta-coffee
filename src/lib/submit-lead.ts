@@ -9,7 +9,8 @@ export async function submitLead(input: LeadInput): Promise<SubmissionResult> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
-      signal: AbortSignal.timeout(15000),
+      // Leave time for a cold database to reconnect before the server deadline.
+      signal: AbortSignal.timeout(50000),
     });
     const body: unknown = await response.json();
     const parsed = responseSchema.safeParse(body);
